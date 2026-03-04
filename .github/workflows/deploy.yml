@@ -35,22 +35,9 @@ jobs:
             "$APP_DIR/venv/bin/pip" install --quiet -r "$APP_DIR/requirements.txt"
 
             # Пишем systemd-сервис с правильными путями
-            cat > /etc/systemd/system/workout-tracker.service << SVCEOF
-[Unit]
-Description=Workout Tracker Flask App
-After=network.target
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=$APP_DIR
-ExecStart=$APP_DIR/venv/bin/python app.py
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-SVCEOF
+            printf '[Unit]\nDescription=Workout Tracker Flask App\nAfter=network.target\n\n[Service]\nType=simple\nUser=root\nWorkingDirectory=%s\nExecStart=%s/venv/bin/python app.py\nRestart=on-failure\nRestartSec=5\n\n[Install]\nWantedBy=multi-user.target\n' \
+              "$APP_DIR" "$APP_DIR" \
+              > /etc/systemd/system/workout-tracker.service
 
             systemctl daemon-reload
             systemctl enable workout-tracker

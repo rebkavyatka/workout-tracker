@@ -34,17 +34,27 @@ jobs:
             # Обновляем зависимости
             "$APP_DIR/venv/bin/pip" install --quiet -r "$APP_DIR/requirements.txt"
 
-            # Перезапускаем сервис (или запускаем если не запущен)
-            if systemctl is-active --quiet workout-tracker; then
-              systemctl restart workout-tracker
-            else
-              # Первый запуск: ставим systemd-сервис
-              sed "s|YOUR_USERNAME|root|g" "$APP_DIR/workout-tracker.service" \
-                > /etc/systemd/system/workout-tracker.service
-              systemctl daemon-reload
-              systemctl enable workout-tracker
-              systemctl start workout-tracker
-            fi
+            # Пишем systemd-сервис с правильными путями
+            cat > /etc/systemd/system/workout-tracker.service << SVCEOF
+[Unit]
+Description=Workout Tracker Flask App
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=$APP_DIR
+ExecStart=$APP_DIR/venv/bin/python app.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+SVCEOF
+
+            systemctl daemon-reload
+            systemctl enable workout-tracker
+            systemctl restart workout-tracker
 
             echo "✅ Deploy complete"
             systemctl status workout-tracker --no-pager -l

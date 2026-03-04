@@ -1,0 +1,50 @@
+name: Deploy to server
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:        ${{ secrets.SSH_HOST }}
+          username:    ${{ secrets.SSH_USER }}
+          key:         ${{ secrets.SSH_PRIVATE_KEY }}
+          port:        ${{ secrets.SSH_PORT }}
+          script: |
+            set -e
+            APP_DIR=/root/workout-tracker
+
+            # Клонируем если первый раз, иначе пулим
+            if [ ! -d "$APP_DIR/.git" ]; then
+              git clone https://github.com/rebkavyatka/workout-tracker.git "$APP_DIR"
+            else
+              git -C "$APP_DIR" pull --ff-only
+            fi
+
+            # Создаём venv если нет
+            if [ ! -d "$APP_DIR/venv" ]; then
+              python3 -m venv "$APP_DIR/venv"
+            fi
+
+            # Обновляем зависимости
+            "$APP_DIR/venv/bin/pip" install --quiet -r "$APP_DIR/requirements.txt"
+
+            # Перезапускаем сервис (или запускаем если не запущен)
+            if systemctl is-active --quiet workout-tracker; then
+              systemctl restart workout-tracker
+            else
+              # Первый запуск: ставим systemd-сервис
+              sed "s|YOUR_USERNAME|root|g" "$APP_DIR/workout-tracker.service" \
+                > /etc/systemd/system/workout-tracker.service
+              systemctl daemon-reload
+              systemctl enable workout-tracker
+              systemctl start workout-tracker
+            fi
+
+            echo "✅ Deploy complete"
+            systemctl status workout-tracker --no-pager -l

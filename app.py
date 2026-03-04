@@ -207,6 +207,20 @@ def get_exercises():
     return jsonify(EXERCISES)
 
 
+@app.route('/api/session/<int:session_id>', methods=['DELETE'])
+@auth_required
+def delete_session(session_id):
+    conn = get_db()
+    try:
+        c = conn.cursor()
+        c.execute('DELETE FROM exercise_sets WHERE session_id=?', (session_id,))
+        c.execute('DELETE FROM workout_sessions WHERE id=?', (session_id,))
+        conn.commit()
+        return jsonify({'ok': True})
+    finally:
+        conn.close()
+
+
 @app.route('/api/export')
 @auth_required
 def export_md():

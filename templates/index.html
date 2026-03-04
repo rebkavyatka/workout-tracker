@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Тренировки</title>
+<style>
+  /* ── Design tokens (iOS 17) ─────────────────────────── */
+  :root {
+    --bg:            #F2F2F7;
+    --card:          #FFFFFF;
+    --primary:       #007AFF;
+    --success:       #34C759;
+    --danger:        #FF3B30;
+    --text:          #000000;
+    --text2:         #3C3C43;
+    --text3:         #8E8E93;
+    --fill3:         rgba(118,118,128,0.12);
+    --fill4:         rgba(118,118,128,0.08);
+    --sep:           rgba(60,60,67,0.18);
+    --r-card:        14px;
+    --r-btn:         12px;
+    --r-input:       10px;
+    --tab-h:         56px;
+    --header-h:      54px;
+    --font:          -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    --shadow-card:   0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  /* ── Reset ──────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+  input, button { font-family: inherit; }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+
+  /* ── App Shell ──────────────────────────────────────── */
+  #app { display: flex; flex-direction: column; height: 100dvh; }
+
+  /* ── Views ──────────────────────────────────────────── */
+  .view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  .view.active { display: flex; }
+
+  /* ── LOGIN ──────────────────────────────────────────── */
+  #v-login {
+    background: linear-gradient(160deg, #1C1C1E 0%, #2C2C2E 100%);
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    padding: 40px 32px;
+  }
+  .login-logo {
+    width: 80px; height: 80px;
+    background: var(--primary);
+    border-radius: 22px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px;
+    box-shadow: 0 8px 32px rgba(0,122,255,0.4);
+  }
+  .login-title {
+    font-size: 28px; font-weight: 700;
+    color: #FFFFFF; letter-spacing: -0.5px; text-align: center;
+  }
+  .login-subtitle { font-size: 15px; color: rgba(255,255,255,0.5); text-align: center; }
+  .login-card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 28px 24px;
+    width: 100%; max-width: 320px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .login-card label { font-size: 13px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.5px; }
+  #login-input {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 24px; letter-spacing: 8px;
+    color: #FFFFFF; text-align: center;
+    outline: none; width: 100%;
+  }
+  #login-input:focus { border-color: var(--primary); background: rgba(0,122,255,0.15); }
+  #login-btn {
+    background: var(--primary); color: #fff;
+    border: none; border-radius: 14px;
+    padding: 16px; font-size: 17px; font-weight: 600;
+    cursor: pointer; transition: opacity .15s;
+  }
+  #login-btn:active { opacity: 0.75; }
+  #login-error { font-size: 14px; color: var(--danger); text-align: center; min-height: 18px; }
+
+  /* ── MAIN APP ───────────────────────────────────────── */
+  #v-app { background: var(--bg); }
+
+  /* Header */
+  .app-header {
+    height: var(--header-h);
+    background: rgba(242,242,247,0.92);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--sep);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+    flex-shrink: 0;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .header-title { font-size: 17px; font-weight: 600; letter-spacing: -0.2px; }
+  .header-btn {
+    background: none; border: none; color: var(--primary);
+    font-size: 15px; font-weight: 500; cursor: pointer; padding: 6px 0;
+  }
+
+  /* Tab content area */
+  .tab-content { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+  .tab-pane { display: none; padding-bottom: 8px; }
+  .tab-pane.active { display: block; }
+
+  /* Tab bar */
+  .tab-bar {
+    height: var(--tab-h);
+    background: rgba(242,242,247,0.95);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-top: 1px solid var(--sep);
+    display: flex; align-items: stretch;
+    flex-shrink: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px;
+    background: none; border: none; cursor: pointer;
+    color: var(--text3); transition: color .15s;
+    padding: 0;
+  }
+  .tab-item.active { color: var(--primary); }
+  .tab-icon { font-size: 22px; line-height: 1; }
+  .tab-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1px; }
+
+  /* ── WORKOUT TAB ────────────────────────────────────── */
+  .workout-header {
+    padding: 12px 16px 8px;
+    display: flex; flex-direction: column; gap: 10px;
+    background: var(--bg);
+    position: sticky; top: 0; z-index: 5;
+    border-bottom: 1px solid var(--sep);
+  }
+  .date-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .date-label { font-size: 13px; color: var(--text3); flex-shrink: 0; }
+  #date-input {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--sep);
+    border-radius: var(--r-input);
+    padding: 7px 12px;
+    font-size: 15px; font-weight: 500; color: var(--text);
+    outline: none; appearance: none; -webkit-appearance: none;
+  }
+  .type-row { display: flex; align-items: center; gap: 10px; }
+  .type-label { font-size: 13px; color: var(--text3); flex-shrink: 0; }
+  .type-pills { display: flex; gap: 6px; }
+  .type-pill {
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-size: 15px; font-weight: 600;
+    border: 1.5px solid var(--sep);
+    background: var(--card); color: var(--text3);
+    cursor: pointer; transition: all .15s;
+  }
+  .type-pill.active-a {
+    background: var(--primary); color: #fff;
+    border-color: var(--primary);
+  }
+  .type-pill.active-b {
+    background: #FF9500; color: #fff;
+    border-color: #FF9500;
+  }
+  .session-badge {
+    font-size: 11px; color: var(--text3); padding: 2px 0;
+  }
+  .session-badge.loaded { color: var(--success); }
+
+  /* Exercise cards */
+  .exercises-list {
+    padding: 8px 12px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .ex-card {
+    background: var(--card);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .ex-header {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 8px 12px 0;
+  }
+  .ex-num {
+    width: 22px; height: 22px;
+    background: var(--primary); color: #fff;
+    border-radius: 50%; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .ex-num.saved-num { background: var(--success); }
+  .ex-name { font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--text); }
+
+  .sets-grid {
+    display: grid;
+    grid-template-columns: 20px 1fr 1fr 70px;
+    align-items: center;
+    gap: 4px 6px;
+    padding: 6px 10px 4px;
+  }
+  .sets-col-header {
+    font-size: 10px; font-weight: 600;
+    color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.3px; padding-bottom: 2px;
+  }
+  .set-num-label {
+    font-size: 12px; font-weight: 600;
+    color: var(--text3); text-align: center;
+  }
+  .set-input {
+    background: var(--fill4);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 5px 6px;
+    font-size: 15px; font-weight: 500; color: var(--text);
+    text-align: center; width: 100%;
+    outline: none; transition: border-color .15s;
+  }
+  .set-input:focus { border-color: var(--primary); background: rgba(0,122,255,0.06); }
+  .set-input.filled { background: rgba(52,199,89,0.08); border-color: rgba(52,199,89,0.3); }
+  .set-unit {
+    font-size: 10px; color: var(--text3);
+    text-align: center; margin-top: 2px;
+  }
+
+  .ex-footer { padding: 4px 10px 8px; display: flex; justify-content: flex-end; }
+  .save-ex-btn {
+    background: var(--primary); color: #fff;
+    border: none; border-radius: var(--r-btn);
+    padding: 7px 18px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .save-ex-btn:active { transform: scale(0.96); }
+  .save-ex-btn.saved {
+    background: var(--success);
+    pointer-events: none;
+  }
+  .save-ex-btn.saving { opacity: 0.6; pointer-events: none; }
+
+  /* ── HISTORY TAB ────────────────────────────────────── */
+  .history-list {
+    padding: 12px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .history-empty {
+    padding: 60px 32px;
+    text-align: center;
+    color: var(--text3);
+    font-size: 16px;
+  }
+  .history-card {
+    background: var(--card);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .history-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .history-date-block { display: flex; flex-direction: column; gap: 2px; }
+  .history-date { font-size: 15px; font-weight: 600; }
+  .history-type-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    font-size: 15px; font-weight: 700; color: #fff;
+  }
+  .badge-a { background: var(--primary); }
+  .badge-b { background: #FF9500; }
+  .history-chevron {
+    color: var(--text3); font-size: 12px;
+    transition: transform .25s; line-height: 1;
+  }
+  .history-card.open .history-chevron { transform: rotate(180deg); }
+  .history-body { display: none; border-top: 1px solid var(--sep); padding: 10px 14px; }
+  .history-card.open .history-body { display: block; }
+  .history-ex { margin-bottom: 10px; }
+  .history-ex:last-child { margin-bottom: 0; }
+  .history-ex-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .history-sets { display: flex; gap: 6px; flex-wrap: wrap; }
+  .history-set-chip {
+    background: var(--fill4);
+    border-radius: 8px;
+    padding: 3px 8px;
+    font-size: 12px; color: var(--text2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── EXPORT TAB ─────────────────────────────────────── */
+  .export-pane {
+    padding: 24px 16px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .export-info-card {
+    background: var(--card);
+    border-radius: var(--r-card);
+    padding: 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .export-info-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .export-info-desc { font-size: 13px; color: var(--text3); line-height: 1.5; }
+  .export-btn {
+    background: var(--primary); color: #fff;
+    border: none; border-radius: var(--r-btn);
+    padding: 16px; font-size: 17px; font-weight: 600;
+    cursor: pointer; transition: opacity .15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .export-btn:active { opacity: 0.75; }
+
+  /* ── Utils ──────────────────────────────────────────── */
+  .section-title {
+    font-size: 13px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text3); padding: 8px 16px 4px;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.78); color: #fff;
+    padding: 10px 20px; border-radius: 20px;
+    font-size: 14px; font-weight: 500;
+    opacity: 0; transition: opacity .3s;
+    pointer-events: none; z-index: 999;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; }
+
+  /* Scrollbar hide */
+  .tab-content::-webkit-scrollbar { display: none; }
+  .tab-content { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── LOGIN ────────────────────────────────────────── -->
+  <div id="v-login" class="view active">
+    <div class="login-logo">💪</div>
+    <div>
+      <div class="login-title">Дневник тренировок</div>
+      <div class="login-subtitle" style="margin-top:4px;">Введите пароль для входа</div>
+    </div>
+    <div class="login-card">
+      <label for="login-input">Пароль</label>
+      <input id="login-input" type="password" inputmode="numeric" maxlength="10" placeholder="····" autocomplete="current-password">
+      <div id="login-error"></div>
+      <button id="login-btn">Войти</button>
+    </div>
+  </div>
+
+  <!-- ── MAIN APP ──────────────────────────────────────── -->
+  <div id="v-app" class="view">
+    <header class="app-header">
+      <div class="header-title" id="header-title">Тренировки</div>
+      <button class="header-btn" id="logout-btn">Выход</button>
+    </header>
+
+    <div class="tab-content">
+
+      <!-- Workout Tab -->
+      <div id="tab-workout" class="tab-pane active">
+        <div class="workout-header">
+          <div class="date-row">
+            <span class="date-label">Дата</span>
+            <input type="date" id="date-input">
+          </div>
+          <div class="type-row">
+            <span class="type-label">Тренировка</span>
+            <div class="type-pills">
+              <button class="type-pill" id="pill-a" data-type="A">А</button>
+              <button class="type-pill" id="pill-b" data-type="B">Б</button>
+            </div>
+            <span class="session-badge" id="session-badge"></span>
+          </div>
+        </div>
+        <div class="exercises-list" id="exercises-list">
+          <div style="padding:40px;text-align:center;color:var(--text3);font-size:14px;">
+            Выберите дату и тип тренировки
+          </div>
+        </div>
+      </div>
+
+      <!-- History Tab -->
+      <div id="tab-history" class="tab-pane">
+        <div id="history-list" class="history-list">
+          <div class="history-empty">История пуста</div>
+        </div>
+      </div>
+
+      <!-- Export Tab -->
+      <div id="tab-export" class="tab-pane">
+        <div class="export-pane">
+          <div class="export-info-card">
+            <div class="export-info-title">📥 Экспорт в Obsidian</div>
+            <div class="export-info-desc">
+              Скачайте файл <strong>workout_history.md</strong> и перенесите его
+              в папку вашего хранилища Obsidian. Файл содержит полную хронологию
+              всех тренировок в формате Markdown.
+            </div>
+          </div>
+          <button class="export-btn" id="export-btn">
+            <span>⬇</span> Скачать workout_history.md
+          </button>
+          <div class="export-info-card">
+            <div class="export-info-title">📋 Структура файла</div>
+            <div class="export-info-desc" style="font-family:monospace;font-size:12px;white-space:pre-line;">## 2026-03-07 — Тренировка А
+
+### 1. Жим гантелей на наклонной...
+- Сет 1: 20 кг × 10 повт.
+- Сет 2: 22 кг × 8 повт.
+- Сет 3: 22 кг × 7 повт.</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-content -->
+
+    <!-- Tab Bar -->
+    <nav class="tab-bar">
+      <button class="tab-item active" data-tab="workout">
+        <span class="tab-icon">🏋️</span>
+        <span class="tab-label">Тренировка</span>
+      </button>
+      <button class="tab-item" data-tab="history">
+        <span class="tab-icon">📅</span>
+        <span class="tab-label">История</span>
+      </button>
+      <button class="tab-item" data-tab="export">
+        <span class="tab-icon">📤</span>
+        <span class="tab-label">Экспорт</span>
+      </button>
+    </nav>
+  </div><!-- /v-app -->
+
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script>
+/* ── State ────────────────────────────────────────────── */
+const S = {
+  sessionId:    null,
+  workoutType:  null,   // 'A' | 'B'
+  exercises:    {},     // EXERCISES from server
+  saved:        new Set(),  // saved exercise nums (1-based)
+  // in-memory form data: S.inputs[exNum][setNum] = {weight, reps}
+};
+
+/* ── Utils ────────────────────────────────────────────── */
+function today() {
+  return new Date().toLocaleDateString('en-CA');  // YYYY-MM-DD
+}
+
+function showToast(msg, duration = 1800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  if (!r.ok && r.status === 401) { showView('login'); return null; }
+  return r.ok ? r.json() : null;
+}
+
+/* ── Views ───────────────────────────────────────────── */
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(`v-${name}`).classList.add('active');
+}
+
+/* ── Tabs ────────────────────────────────────────────── */
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tabName}`).classList.add('active');
+  document.querySelector(`.tab-item[data-tab="${tabName}"]`).classList.add('active');
+
+  // Update header title
+  const titles = { workout: 'Тренировка', history: 'История', export: 'Экспорт' };
+  document.getElementById('header-title').textContent = titles[tabName];
+
+  if (tabName === 'history') loadHistory();
+}
+
+document.querySelectorAll('.tab-item').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+/* ── Login ───────────────────────────────────────────── */
+async function doLogin() {
+  const pwd = document.getElementById('login-input').value;
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+
+  const btn = document.getElementById('login-btn');
+  btn.textContent = '...';
+  btn.disabled = true;
+
+  const data = await api('POST', '/api/login', { password: pwd });
+  btn.textContent = 'Войти';
+  btn.disabled = false;
+
+  if (data?.ok) {
+    showView('app');
+    await loadExercisesData();
+    initWorkoutTab();
+  } else {
+    errEl.textContent = 'Неверный пароль';
+    document.getElementById('login-input').value = '';
+    document.getElementById('login-input').focus();
+  }
+}
+
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('login-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+/* ── Logout ──────────────────────────────────────────── */
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await api('POST', '/api/logout');
+  showView('login');
+  document.getElementById('login-input').value = '';
+  document.getElementById('login-error').textContent = '';
+  S.sessionId = null;
+  S.workoutType = null;
+  S.saved.clear();
+});
+
+/* ── Load exercises from server ─────────────────────── */
+async function loadExercisesData() {
+  const data = await api('GET', '/api/exercises');
+  if (data) S.exercises = data;
+}
+
+/* ── Workout Tab ─────────────────────────────────────── */
+function initWorkoutTab() {
+  const dateInput = document.getElementById('date-input');
+  dateInput.value = today();
+  dateInput.max = today();
+
+  dateInput.addEventListener('change', onDateOrTypeChange);
+  document.getElementById('pill-a').addEventListener('click', () => selectType('A'));
+  document.getElementById('pill-b').addEventListener('click', () => selectType('B'));
+
+  suggestAndLoad();
+}
+
+async function suggestAndLoad() {
+  const d = document.getElementById('date-input').value;
+  const data = await api('GET', `/api/suggest?date=${d}`);
+  if (data?.suggested) {
+    selectType(data.suggested, false);
+  } else {
+    // Non-workout day — still allow manual selection
+    selectType('A', false);
+  }
+}
+
+function onDateOrTypeChange() {
+  suggestAndLoad();
+}
+
+function selectType(type, autoLoad = true) {
+  S.workoutType = type;
+  const pillA = document.getElementById('pill-a');
+  const pillB = document.getElementById('pill-b');
+  pillA.className = 'type-pill' + (type === 'A' ? ' active-a' : '');
+  pillB.className = 'type-pill' + (type === 'B' ? ' active-b' : '');
+  if (autoLoad || S.sessionId === null) loadSession();
+}
+
+async function loadSession() {
+  if (!S.workoutType) return;
+  const d = document.getElementById('date-input').value;
+  if (!d) return;
+
+  const badge = document.getElementById('session-badge');
+  badge.textContent = '...';
+  badge.className = 'session-badge';
+
+  const data = await api('POST', '/api/session', { date: d, type: S.workoutType });
+  if (!data) return;
+
+  S.sessionId = data.session_id;
+  S.saved.clear();
+
+  // Build lookup of saved sets
+  const savedSets = {};  // {exNum: {setNum: {weight, reps}}}
+  for (const s of data.sets) {
+    if (!savedSets[s.exercise_num]) savedSets[s.exercise_num] = {};
+    savedSets[s.exercise_num][s.set_num] = { weight: s.weight, reps: s.reps };
+  }
+
+  // Figure out which exercises are fully saved (all 3 sets present)
+  const exList = S.exercises[S.workoutType] || [];
+  exList.forEach((_, idx) => {
+    const exNum = idx + 1;
+    const sets = savedSets[exNum];
+    if (sets && Object.keys(sets).length === 3) S.saved.add(exNum);
+  });
+
+  badge.textContent = data.sets.length > 0
+    ? `✓ Загружено сохранений: ${Object.keys(savedSets).length}`
+    : '';
+  badge.className = 'session-badge' + (data.sets.length > 0 ? ' loaded' : '');
+
+  renderExercises(savedSets);
+}
+
+function renderExercises(savedSets = {}) {
+  const container = document.getElementById('exercises-list');
+  const exList = S.exercises[S.workoutType] || [];
+  if (!exList.length) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3);font-size:14px;">Нет данных</div>';
+    return;
+  }
+
+  container.innerHTML = '';
+  exList.forEach((name, idx) => {
+    const exNum = idx + 1;
+    const isSaved = S.saved.has(exNum);
+    const exSets = savedSets[exNum] || {};
+
+    const card = document.createElement('div');
+    card.className = 'ex-card';
+    card.id = `ex-card-${exNum}`;
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'ex-header';
+    header.innerHTML = `
+      <div class="ex-num ${isSaved ? 'saved-num' : ''}" id="ex-num-${exNum}">${exNum}</div>
+      <div class="ex-name">${name}</div>`;
+    card.appendChild(header);
+
+    // Sets grid
+    const grid = document.createElement('div');
+    grid.className = 'sets-grid';
+
+    // Column headers
+    grid.innerHTML = `
+      <div class="sets-col-header">№</div>
+      <div class="sets-col-header" style="text-align:center">кг</div>
+      <div class="sets-col-header" style="text-align:center">повт.</div>
+      <div></div>`;
+
+    // 3 set rows
+    for (let setNum = 1; setNum <= 3; setNum++) {
+      const saved = exSets[setNum];
+      const wVal = saved?.weight ?? '';
+      const rVal = saved?.reps ?? '';
+
+      const numLabel = document.createElement('div');
+      numLabel.className = 'set-num-label';
+      numLabel.textContent = setNum;
+
+      const wInput = document.createElement('input');
+      wInput.type = 'number';
+      wInput.inputMode = 'numeric';
+      wInput.min = 0; wInput.max = 999;
+      wInput.className = 'set-input' + (wVal !== '' ? ' filled' : '');
+      wInput.value = wVal;
+      wInput.placeholder = '0';
+      wInput.id = `w-${exNum}-${setNum}`;
+      wInput.dataset.ex = exNum;
+      wInput.dataset.set = setNum;
+      wInput.addEventListener('input', onSetInput);
+
+      const rInput = document.createElement('input');
+      rInput.type = 'number';
+      rInput.inputMode = 'numeric';
+      rInput.min = 0; rInput.max = 99;
+      rInput.className = 'set-input' + (rVal !== '' ? ' filled' : '');
+      rInput.value = rVal;
+      rInput.placeholder = '0';
+      rInput.id = `r-${exNum}-${setNum}`;
+      rInput.dataset.ex = exNum;
+      rInput.dataset.set = setNum;
+      rInput.addEventListener('input', onSetInput);
+
+      // unit labels in one cell
+      const units = document.createElement('div');
+      units.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0';
+      units.innerHTML = `<div class="set-unit">кг</div><div class="set-unit">раз</div>`;
+
+      grid.appendChild(numLabel);
+      grid.appendChild(wInput);
+      grid.appendChild(rInput);
+      grid.appendChild(document.createElement('div'));  // spacer for grid alignment
+    }
+    card.appendChild(grid);
+
+    // Footer with save button
+    const footer = document.createElement('div');
+    footer.className = 'ex-footer';
+    const btn = document.createElement('button');
+    btn.className = 'save-ex-btn' + (isSaved ? ' saved' : '');
+    btn.id = `save-btn-${exNum}`;
+    btn.dataset.exNum = exNum;
+    btn.textContent = isSaved ? '✓ Сохранено' : 'Сохранить';
+    btn.addEventListener('click', () => saveExercise(exNum));
+    footer.appendChild(btn);
+    card.appendChild(footer);
+
+    container.appendChild(card);
+  });
+}
+
+function onSetInput(e) {
+  const input = e.target;
+  if (input.value !== '') input.classList.add('filled');
+  else input.classList.remove('filled');
+}
+
+async function saveExercise(exNum) {
+  if (!S.sessionId) { showToast('Сначала выберите дату и тип тренировки'); return; }
+  const exName = (S.exercises[S.workoutType] || [])[exNum - 1];
+  if (!exName) return;
+
+  const btn = document.getElementById(`save-btn-${exNum}`);
+  btn.classList.add('saving');
+  btn.textContent = '...';
+
+  const sets = [];
+  for (let setNum = 1; setNum <= 3; setNum++) {
+    const wEl = document.getElementById(`w-${exNum}-${setNum}`);
+    const rEl = document.getElementById(`r-${exNum}-${setNum}`);
+    const weight = wEl.value !== '' ? parseInt(wEl.value) : null;
+    const reps   = rEl.value !== '' ? parseInt(rEl.value)   : null;
+    sets.push({ set_num: setNum, weight, reps });
+  }
+
+  const result = await api('POST', '/api/save_exercise', {
+    session_id: S.sessionId,
+    exercise_num: exNum,
+    exercise_name: exName,
+    sets
+  });
+
+  if (result?.ok) {
+    S.saved.add(exNum);
+    btn.classList.remove('saving');
+    btn.classList.add('saved');
+    btn.textContent = '✓ Сохранено';
+    const numEl = document.getElementById(`ex-num-${exNum}`);
+    if (numEl) { numEl.classList.add('saved-num'); }
+    showToast(`Упражнение ${exNum} сохранено`);
+
+    // Update badge
+    const badge = document.getElementById('session-badge');
+    badge.textContent = `✓ Сохранено упражнений: ${S.saved.size}`;
+    badge.className = 'session-badge loaded';
+  } else {
+    btn.classList.remove('saving');
+    btn.textContent = 'Сохранить';
+    showToast('Ошибка сохранения', 2500);
+  }
+}
+
+/* ── History Tab ─────────────────────────────────────── */
+async function loadHistory() {
+  const data = await api('GET', '/api/history');
+  const container = document.getElementById('history-list');
+  if (!data || data.length === 0) {
+    container.innerHTML = '<div class="history-empty">История пуста</div>';
+    return;
+  }
+  container.innerHTML = '';
+
+  data.forEach(sess => {
+    const card = document.createElement('div');
+    card.className = 'history-card';
+
+    const header = document.createElement('div');
+    header.className = 'history-card-header';
+
+    // Group sets by exercise
+    const byEx = {};
+    for (const s of sess.sets) {
+      const key = s.exercise_num;
+      if (!byEx[key]) byEx[key] = { name: s.exercise_name, sets: [] };
+      byEx[key].sets.push(s);
+    }
+    const exCount = Object.keys(byEx).length;
+
+    header.innerHTML = `
+      <div class="history-date-block">
+        <div class="history-date">${formatDate(sess.date)}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:1px">${exCount} упр.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="history-type-badge ${sess.workout_type === 'A' ? 'badge-a' : 'badge-b'}">${sess.workout_type === 'A' ? 'А' : 'Б'}</span>
+        <span class="history-chevron">▼</span>
+      </div>`;
+
+    card.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'history-body';
+
+    Object.entries(byEx).sort((a,b) => a[0]-b[0]).forEach(([exNum, ex]) => {
+      const exDiv = document.createElement('div');
+      exDiv.className = 'history-ex';
+      exDiv.innerHTML = `<div class="history-ex-name">${exNum}. ${ex.name}</div>`;
+      const setsDiv = document.createElement('div');
+      setsDiv.className = 'history-sets';
+      ex.sets.forEach(s => {
+        const chip = document.createElement('span');
+        chip.className = 'history-set-chip';
+        const w = s.weight != null ? `${s.weight} кг` : '—';
+        const r = s.reps   != null ? `${s.reps} ×`   : '—';
+        chip.textContent = `С${s.set_num}: ${r} ${w}`;
+        setsDiv.appendChild(chip);
+      });
+      exDiv.appendChild(setsDiv);
+      body.appendChild(exDiv);
+    });
+
+    card.appendChild(body);
+
+    header.addEventListener('click', () => {
+      card.classList.toggle('open');
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function formatDate(iso) {
+  const [y, m, d] = iso.split('-');
+  const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  const days = ['вс','пн','вт','ср','чт','пт','сб'];
+  const dt = new Date(+y, +m-1, +d);
+  return `${+d} ${months[+m-1]} ${y}, ${days[dt.getDay()]}`;
+}
+
+/* ── Export Tab ──────────────────────────────────────── */
+document.getElementById('export-btn').addEventListener('click', () => {
+  window.location.href = '/api/export';
+});
+
+/* ── Date input: prevent future dates ───────────────── */
+document.getElementById('date-input').addEventListener('change', function() {
+  if (this.value > today()) this.value = today();
+  suggestAndLoad();
+});
+
+</script>
+</body>
+</html>

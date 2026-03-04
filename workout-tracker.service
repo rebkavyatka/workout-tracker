@@ -1,0 +1,22 @@
+# systemd service для автозапуска при перезагрузке сервера
+# Установка:
+#   sudo cp workout-tracker.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable workout-tracker
+#   sudo systemctl start workout-tracker
+
+[Unit]
+Description=Workout Tracker Flask App
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+WorkingDirectory=/home/YOUR_USERNAME/workout-tracker
+ExecStart=/home/YOUR_USERNAME/workout-tracker/venv/bin/python app.py
+Restart=on-failure
+RestartSec=5
+Environment=SECRET_KEY=замените_на_свой_секретный_ключ
+
+[Install]
+WantedBy=multi-user.target

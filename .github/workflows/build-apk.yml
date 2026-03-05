@@ -25,8 +25,12 @@ jobs:
       - name: Generate app icons from icon.png
         run: |
           sudo apt-get install -y imagemagick
-          # Crop to square from center, then resize to each density
-          convert android/icon.png -gravity center -crop 1024x1024+0+0 +repage /tmp/icon_square.png
+          # Trim black border, crop to square, then resize to each density
+          convert android/icon.png -fuzz 20% -trim +repage /tmp/icon_trimmed.png
+          W=$(identify -format "%w" /tmp/icon_trimmed.png)
+          H=$(identify -format "%h" /tmp/icon_trimmed.png)
+          S=$((W < H ? W : H))
+          convert /tmp/icon_trimmed.png -gravity center -crop ${S}x${S}+0+0 +repage /tmp/icon_square.png
           declare -A sizes=(
             [mipmap-mdpi]=48
             [mipmap-hdpi]=72

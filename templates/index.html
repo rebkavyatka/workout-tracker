@@ -616,15 +616,22 @@ async function loadExercisesData() {
 }
 
 /* ── Workout Tab ─────────────────────────────────────── */
+let _workoutTabInited = false;
 function initWorkoutTab() {
   const dateInput = document.getElementById('date-input');
   dateInput.value = today();
   dateInput.max = today();
 
-  dateInput.addEventListener('change', onDateOrTypeChange);
-  document.getElementById('pill-a').addEventListener('click', () => selectType('A'));
-  document.getElementById('pill-b').addEventListener('click', () => selectType('B'));
+  // Добавляем listeners только один раз — чтобы не накапливались при повторном входе
+  if (!_workoutTabInited) {
+    dateInput.addEventListener('change', onDateOrTypeChange);
+    document.getElementById('pill-a').addEventListener('click', () => selectType('A'));
+    document.getElementById('pill-b').addEventListener('click', () => selectType('B'));
+    _workoutTabInited = true;
+  }
 
+  S.sessionId = null;
+  S.saved.clear();
   suggestAndLoad();
 }
 

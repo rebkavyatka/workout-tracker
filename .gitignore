@@ -5,3 +5,4 @@ workouts.db
 *.db
 .env
 exercises.png
+[0-9]*.png

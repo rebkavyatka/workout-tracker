@@ -22,6 +22,24 @@ jobs:
           unzip -q /tmp/gradle.zip -d /opt/gradle
           echo "/opt/gradle/gradle-8.6/bin" >> $GITHUB_PATH
 
+      - name: Generate app icons from icon.png
+        run: |
+          sudo apt-get install -y imagemagick
+          # Crop to square from center, then resize to each density
+          convert android/icon.png -gravity center -crop 1024x1024+0+0 +repage /tmp/icon_square.png
+          declare -A sizes=(
+            [mipmap-mdpi]=48
+            [mipmap-hdpi]=72
+            [mipmap-xhdpi]=96
+            [mipmap-xxhdpi]=144
+            [mipmap-xxxhdpi]=192
+          )
+          for dir in "${!sizes[@]}"; do
+            size=${sizes[$dir]}
+            mkdir -p android/app/src/main/res/$dir
+            convert /tmp/icon_square.png -resize ${size}x${size} android/app/src/main/res/$dir/ic_launcher.png
+          done
+
       - name: Build debug APK
         working-directory: android
         run: gradle assembleDebug

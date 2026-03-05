@@ -4,9 +4,18 @@ import os
 from datetime import date
 from functools import wraps
 import io
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'wt_xK9mP_2026_secret')
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri='memory://',
+)
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'workouts.db')
 
@@ -97,11 +106,17 @@ def index():
 
 
 @app.route('/api/login', methods=['POST'])
+@limiter.limit('5 per minute')
 def login():
     if request.json.get('password') == '1732':
         session['authenticated'] = True
         return jsonify({'ok': True})
     return jsonify({'ok': False, 'error': 'Неверный пароль'}), 401
+
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify({'ok': False, 'error': 'Слишком много попыток. Подождите минуту.'}), 429
 
 
 @app.route('/api/logout', methods=['POST'])

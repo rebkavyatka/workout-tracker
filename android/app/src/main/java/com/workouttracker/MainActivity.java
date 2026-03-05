@@ -20,6 +20,7 @@ public class MainActivity extends Activity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setUserAgentString(settings.getUserAgentString() + " WTApp-wt_xK9mP_2026");
         webView.setWebViewClient(new WebViewClient());
         webView.loadUrl("http://95.217.212.158:5173");
     }

@@ -4,3 +4,4 @@ __pycache__/
 workouts.db
 *.db
 .env
+exercises.png

@@ -226,7 +226,7 @@
     padding-right: 10px;
   }
   .ex-img {
-    width: 90px; height: 90px;
+    width: 117px; height: 117px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
@@ -235,7 +235,7 @@
 
   .sets-grid {
     display: grid;
-    grid-template-columns: 18px 52px 52px;
+    grid-template-columns: 25px 73px 73px;
     align-items: center;
     gap: 4px 8px;
     padding: 6px 10px 4px;
@@ -247,15 +247,15 @@
     letter-spacing: 0.3px; padding-bottom: 2px;
   }
   .set-num-label {
-    font-size: 12px; font-weight: 600;
+    font-size: 17px; font-weight: 600;
     color: var(--text3); text-align: center;
   }
   .set-input {
     background: var(--fill4);
     border: 1px solid transparent;
     border-radius: 8px;
-    padding: 5px 6px;
-    font-size: 15px; font-weight: 500; color: var(--text);
+    padding: 7px 8px;
+    font-size: 21px; font-weight: 500; color: var(--text);
     text-align: center; width: 100%;
     outline: none; transition: border-color .15s;
   }
@@ -278,7 +278,6 @@
   .save-ex-btn:active { transform: scale(0.96); }
   .save-ex-btn.saved {
     background: var(--success);
-    pointer-events: none;
   }
   .save-ex-btn.saving { opacity: 0.6; pointer-events: none; }
 
@@ -748,8 +747,9 @@ function renderExercises(savedSets = {}) {
 
       const wInput = document.createElement('input');
       wInput.type = 'number';
-      wInput.inputMode = 'numeric';
-      wInput.min = 0; wInput.max = 99;
+      wInput.inputMode = 'decimal';
+      wInput.min = 0; wInput.max = 999;
+      wInput.step = '0.5';
       wInput.className = 'set-input' + (wVal !== '' ? ' filled' : '');
       wInput.value = wVal;
       wInput.placeholder = '0';
@@ -757,7 +757,7 @@ function renderExercises(savedSets = {}) {
       wInput.dataset.ex = exNum;
       wInput.dataset.set = setNum;
       wInput.addEventListener('input', e => {
-        if (e.target.value.length > 2) e.target.value = e.target.value.slice(0, 2);
+        if (e.target.value.length > 4) e.target.value = e.target.value.slice(0, 4);
         onSetInput(e);
       });
 
@@ -826,7 +826,7 @@ async function saveExercise(exNum) {
   for (let setNum = 1; setNum <= 3; setNum++) {
     const wEl = document.getElementById(`w-${exNum}-${setNum}`);
     const rEl = document.getElementById(`r-${exNum}-${setNum}`);
-    const weight = wEl.value !== '' ? parseInt(wEl.value) : null;
+    const weight = wEl.value !== '' ? parseFloat(wEl.value) : null;
     const reps   = rEl.value !== '' ? parseInt(rEl.value)   : null;
     sets.push({ set_num: setNum, weight, reps });
   }
@@ -846,6 +846,10 @@ async function saveExercise(exNum) {
     const numEl = document.getElementById(`ex-num-${exNum}`);
     if (numEl) { numEl.classList.add('saved-num'); }
     showToast(`Упражнение ${exNum} сохранено`);
+    setTimeout(() => {
+      btn.classList.remove('saved');
+      btn.textContent = 'Сохранить';
+    }, 1500);
 
     // Update badge
     const badge = document.getElementById('session-badge');

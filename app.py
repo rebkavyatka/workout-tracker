@@ -10,20 +10,6 @@ from flask_limiter.util import get_remote_address
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'wt_xK9mP_2026_secret')
 
-APP_UA_TOKEN = 'WTApp-wt_xK9mP_2026'
-
-
-@app.before_request
-def check_app_origin():
-    ua = request.headers.get('User-Agent', '')
-    if APP_UA_TOKEN not in ua:
-        return (
-            '<html><body style="font-family:sans-serif;text-align:center;margin-top:20%">'
-            '<h2>Доступ только через приложение</h2>'
-            '</body></html>'
-        ), 403
-
-
 limiter = Limiter(
     get_remote_address,
     app=app,

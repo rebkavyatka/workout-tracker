@@ -53,43 +53,31 @@
 
   /* ── LOGIN ──────────────────────────────────────────── */
   #v-login {
-    position: relative;
-    overflow: hidden;
-    background: #0D0D0D;
-    justify-content: flex-end;
+    background: #000;
     align-items: center;
-    padding-bottom: max(52px, env(safe-area-inset-bottom, 0px) + 40px);
+    justify-content: flex-start;
+    overflow: hidden;
   }
 
   .login-bg-photo {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
+    width: 88vw;
+    max-width: 420px;
+    height: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+    margin-top: max(16px, env(safe-area-inset-top, 16px));
   }
 
-  .login-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0,0,0,0)     25%,
-      rgba(0,0,0,0.55)  55%,
-      rgba(0,0,0,0.90)  72%,
-      rgba(0,0,0,0.97) 100%
-    );
-  }
+  .login-overlay { display: none; }
 
   .login-content {
-    position: relative;
-    z-index: 2;
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     width: 100%;
-    padding: 0 32px;
+    padding: 4px 32px max(40px, calc(env(safe-area-inset-bottom, 0px) + 32px));
     gap: 22px;
   }
 
@@ -1164,11 +1152,11 @@ async function finishWorkout() {
 
   showView('thanks');
 
-  // Auto-redirect to history after 20 seconds
+  // Auto-redirect to history after 10 seconds
   setTimeout(() => {
     showView('app');
     switchTab('history');
-  }, 20000);
+  }, 10000);
 }
 
 /* ── History Tab ─────────────────────────────────────── */

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Тренировки</title>
 <style>
   /* ── Design tokens (iOS 17) ─────────────────────────── */
@@ -53,57 +53,144 @@
 
   /* ── LOGIN ──────────────────────────────────────────── */
   #v-login {
-    background: linear-gradient(160deg, #1C1C1E 0%, #2C2C2E 100%);
+    position: relative;
+    overflow: hidden;
+    background: #0D0D0D;
+    justify-content: flex-end;
+    align-items: center;
+    padding-bottom: max(52px, env(safe-area-inset-bottom, 0px) + 40px);
+  }
+
+  .login-bg-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .login-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0)     25%,
+      rgba(0,0,0,0.55)  55%,
+      rgba(0,0,0,0.90)  72%,
+      rgba(0,0,0,0.97) 100%
+    );
+  }
+
+  .login-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0 32px;
+    gap: 22px;
+  }
+
+  .login-slogan {
+    font-size: 20px;
+    font-weight: 600;
+    color: #FFFFFF;
+    text-align: center;
+    line-height: 1.35;
+    letter-spacing: -0.2px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.6);
+  }
+
+  /* PIN widget */
+  .pin-widget {
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+  }
+  .pin-boxes {
+    display: flex;
+    gap: 14px;
+    pointer-events: none;
+  }
+  .pin-box {
+    width: 58px; height: 58px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.22);
+    transition: background .15s, border-color .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pin-box.filled {
+    background: rgba(0,122,255,0.22);
+    border-color: var(--primary);
+  }
+  .pin-box.filled::after {
+    content: '';
+    width: 18px; height: 18px;
+    background: #fff;
+    border-radius: 50%;
+  }
+  .pin-real-input {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    opacity: 0.01;
+    font-size: 1px;
+    border: none; outline: none;
+    cursor: pointer;
+    background: transparent;
+    color: transparent;
+    caret-color: transparent;
+  }
+
+  .login-error {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--danger);
+    text-align: center;
+    min-height: 18px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+  .login-error.locked {
+    color: rgba(255,255,255,0.65);
+    font-size: 13px;
+  }
+
+  /* ── WELCOME ─────────────────────────────────────────── */
+  #v-welcome {
+    background: var(--bg);
     justify-content: center;
     align-items: center;
-    gap: 32px;
     padding: 40px 32px;
+    gap: 36px;
   }
-  .login-logo {
-    width: 80px; height: 80px;
-    background: var(--primary);
-    border-radius: 22px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 40px;
-    box-shadow: 0 8px 32px rgba(0,122,255,0.4);
+  .welcome-emoji { font-size: 64px; line-height: 1; }
+  .welcome-text {
+    font-size: 24px; font-weight: 700;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.35;
+    letter-spacing: -0.4px;
   }
-  .login-title {
-    font-size: 28px; font-weight: 700;
-    color: #FFFFFF; letter-spacing: -0.5px; text-align: center;
-  }
-  .login-subtitle { font-size: 15px; color: rgba(255,255,255,0.5); text-align: center; }
-  .login-card {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 20px;
-    padding: 28px 24px;
-    width: 100%; max-width: 320px;
-    display: flex; flex-direction: column; gap: 16px;
-  }
-  .login-card label { font-size: 13px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.5px; }
-  #login-input {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-size: 24px; letter-spacing: 8px;
-    color: #FFFFFF; text-align: center;
-    outline: none; width: 100%;
-  }
-  #login-input:focus { border-color: var(--primary); background: rgba(0,122,255,0.15); }
-  #login-btn {
+  .welcome-btn {
+    width: 100%; max-width: 340px;
     background: var(--primary); color: #fff;
-    border: none; border-radius: 14px;
-    padding: 16px; font-size: 17px; font-weight: 600;
-    cursor: pointer; transition: opacity .15s;
+    border: none; border-radius: 16px;
+    padding: 18px;
+    font-size: 18px; font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,122,255,0.35);
+    transition: opacity .15s, transform .1s;
   }
-  #login-btn:active { opacity: 0.75; }
-  #login-error { font-size: 14px; color: var(--danger); text-align: center; min-height: 18px; }
+  .welcome-btn:active { opacity: 0.8; transform: scale(0.98); }
 
   /* ── MAIN APP ───────────────────────────────────────── */
   #v-app { background: var(--bg); }
 
-  /* Header */
   .app-header {
     height: var(--header-h);
     background: rgba(242,242,247,0.92);
@@ -121,12 +208,10 @@
     font-size: 15px; font-weight: 500; cursor: pointer; padding: 6px 0;
   }
 
-  /* Tab content area */
   .tab-content { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
   .tab-pane { display: none; padding-bottom: 8px; }
   .tab-pane.active { display: block; }
 
-  /* Tab bar */
   .tab-bar {
     height: var(--tab-h);
     background: rgba(242,242,247,0.95);
@@ -156,9 +241,7 @@
     position: sticky; top: 0; z-index: 5;
     border-bottom: 1px solid var(--sep);
   }
-  .date-row {
-    display: flex; align-items: center; gap: 10px;
-  }
+  .date-row { display: flex; align-items: center; gap: 10px; }
   .date-label { font-size: 13px; color: var(--text3); flex-shrink: 0; }
   #date-input {
     flex: 1;
@@ -180,17 +263,9 @@
     background: var(--card); color: var(--text3);
     cursor: pointer; transition: all .15s;
   }
-  .type-pill.active-a {
-    background: var(--primary); color: #fff;
-    border-color: var(--primary);
-  }
-  .type-pill.active-b {
-    background: #FF9500; color: #fff;
-    border-color: #FF9500;
-  }
-  .session-badge {
-    font-size: 11px; color: var(--text3); padding: 2px 0;
-  }
+  .type-pill.active-a { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .type-pill.active-b { background: #FF9500; color: #fff; border-color: #FF9500; }
+  .session-badge { font-size: 11px; color: var(--text3); padding: 2px 0; }
   .session-badge.loaded { color: var(--success); }
 
   /* Exercise cards */
@@ -218,7 +293,6 @@
   .ex-num.saved-num { background: var(--success); }
   .ex-name { font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--text); }
 
-  /* Exercise card body: grid on left, image on right */
   .ex-card-body {
     display: flex;
     align-items: center;
@@ -233,9 +307,10 @@
     background: var(--fill4);
   }
 
+  /* Sets grid — no set numbers, 2 columns only */
   .sets-grid {
     display: grid;
-    grid-template-columns: 25px 73px 73px;
+    grid-template-columns: 62px 62px;
     align-items: center;
     gap: 4px 8px;
     padding: 6px 10px 4px;
@@ -245,25 +320,41 @@
     font-size: 10px; font-weight: 600;
     color: var(--text3); text-transform: uppercase;
     letter-spacing: 0.3px; padding-bottom: 2px;
-  }
-  .set-num-label {
-    font-size: 17px; font-weight: 600;
-    color: var(--text3); text-align: center;
+    text-align: center;
   }
   .set-input {
     background: var(--fill4);
     border: 1px solid transparent;
     border-radius: 8px;
-    padding: 7px 8px;
-    font-size: 21px; font-weight: 500; color: var(--text);
+    padding: 6px 7px;
+    font-size: 18px; font-weight: 500; color: var(--text);
     text-align: center; width: 100%;
     outline: none; transition: border-color .15s;
   }
   .set-input:focus { border-color: var(--primary); background: rgba(0,122,255,0.06); }
   .set-input.filled { background: rgba(52,199,89,0.08); border-color: rgba(52,199,89,0.3); }
-  .set-unit {
-    font-size: 10px; color: var(--text3);
-    text-align: center; margin-top: 2px;
+
+  /* Last results hint */
+  .ex-last-result {
+    display: none;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 0 10px 6px 10px;
+  }
+  .ex-last-label {
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .ex-last-chip {
+    background: var(--fill4);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 11px;
+    color: var(--text2);
+    font-variant-numeric: tabular-nums;
   }
 
   .ex-footer { padding: 4px 10px 8px; display: flex; justify-content: flex-end; }
@@ -276,22 +367,28 @@
     display: flex; align-items: center; gap: 5px;
   }
   .save-ex-btn:active { transform: scale(0.96); }
-  .save-ex-btn.saved {
-    background: var(--success);
-  }
+  .save-ex-btn.saved { background: var(--success); }
   .save-ex-btn.saving { opacity: 0.6; pointer-events: none; }
 
+  /* Finish workout button */
+  .finish-workout-wrap {
+    padding: 12px 12px 24px;
+  }
+  .finish-workout-btn {
+    width: 100%;
+    background: var(--success); color: #fff;
+    border: none; border-radius: var(--r-btn);
+    padding: 16px;
+    font-size: 17px; font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(52,199,89,0.3);
+    transition: opacity .15s, transform .1s;
+  }
+  .finish-workout-btn:active { opacity: 0.8; transform: scale(0.98); }
+
   /* ── HISTORY TAB ────────────────────────────────────── */
-  .history-list {
-    padding: 12px;
-    display: flex; flex-direction: column; gap: 10px;
-  }
-  .history-empty {
-    padding: 60px 32px;
-    text-align: center;
-    color: var(--text3);
-    font-size: 16px;
-  }
+  .history-list { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .history-empty { padding: 60px 32px; text-align: center; color: var(--text3); font-size: 16px; }
   .history-card {
     background: var(--card);
     border-radius: var(--r-card);
@@ -320,10 +417,7 @@
   }
   .badge-a { background: var(--primary); }
   .badge-b { background: #FF9500; }
-  .history-chevron {
-    color: var(--text3); font-size: 12px;
-    transition: transform .25s; line-height: 1;
-  }
+  .history-chevron { color: var(--text3); font-size: 12px; transition: transform .25s; line-height: 1; }
   .history-card.open .history-chevron { transform: rotate(180deg); }
   .history-body { display: none; border-top: 1px solid var(--sep); padding: 10px 14px; }
   .history-card.open .history-body { display: block; }
@@ -338,7 +432,6 @@
     font-size: 12px; color: var(--text2);
     font-variant-numeric: tabular-nums;
   }
-
   .history-delete-bar {
     position: sticky; bottom: 0;
     padding: 10px 12px;
@@ -359,16 +452,8 @@
   .delete-session-btn:active { opacity: 0.75; }
 
   /* ── EXPORT TAB ─────────────────────────────────────── */
-  .export-pane {
-    padding: 24px 16px;
-    display: flex; flex-direction: column; gap: 16px;
-  }
-  .export-info-card {
-    background: var(--card);
-    border-radius: var(--r-card);
-    padding: 16px;
-    box-shadow: var(--shadow-card);
-  }
+  .export-pane { padding: 24px 16px; display: flex; flex-direction: column; gap: 16px; }
+  .export-info-card { background: var(--card); border-radius: var(--r-card); padding: 16px; box-shadow: var(--shadow-card); }
   .export-info-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
   .export-info-desc { font-size: 13px; color: var(--text3); line-height: 1.5; }
   .export-btn {
@@ -380,14 +465,35 @@
   }
   .export-btn:active { opacity: 0.75; }
 
-  /* ── Utils ──────────────────────────────────────────── */
-  .section-title {
-    font-size: 13px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    color: var(--text3); padding: 8px 16px 4px;
+  /* ── THANKS SCREEN ──────────────────────────────────── */
+  #v-thanks {
+    background: #0D0D0D;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    padding: 40px 32px;
+  }
+  .thanks-video-wrap {
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(255,255,255,0.18);
+    flex-shrink: 0;
+  }
+  .thanks-video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .thanks-phrase {
+    font-size: 22px; font-weight: 700;
+    color: #FFFFFF;
+    text-align: center;
+    line-height: 1.35;
+    letter-spacing: -0.3px;
+    max-width: 320px;
   }
 
-  /* Toast */
+  /* ── Utils ──────────────────────────────────────────── */
   #toast {
     position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
     background: rgba(0,0,0,0.78); color: #fff;
@@ -399,7 +505,6 @@
   }
   #toast.show { opacity: 1; }
 
-  /* Scrollbar hide */
   .tab-content::-webkit-scrollbar { display: none; }
   .tab-content { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
@@ -407,25 +512,38 @@
 <body>
 <div id="app">
 
-  <!-- ── LOGIN ────────────────────────────────────────── -->
+  <!-- ── LOGIN ─────────────────────────────────────────── -->
   <div id="v-login" class="view active">
-    <div class="login-logo">💪</div>
-    <div>
-      <div class="login-title">Дневник тренировок</div>
-      <div class="login-subtitle" style="margin-top:4px;">Введите пароль для входа</div>
+    <img id="login-photo" class="login-bg-photo" src="" alt="">
+    <div class="login-overlay"></div>
+    <div class="login-content">
+      <p id="login-slogan" class="login-slogan"></p>
+      <div class="pin-widget" id="pin-widget">
+        <div class="pin-boxes">
+          <div class="pin-box" id="pb1"></div>
+          <div class="pin-box" id="pb2"></div>
+          <div class="pin-box" id="pb3"></div>
+          <div class="pin-box" id="pb4"></div>
+        </div>
+        <input id="login-input" type="password" inputmode="numeric"
+               maxlength="4" autocomplete="current-password"
+               class="pin-real-input">
+      </div>
+      <p id="login-error" class="login-error"></p>
     </div>
-    <div class="login-card">
-      <label for="login-input">Пароль</label>
-      <input id="login-input" type="password" inputmode="numeric" maxlength="10" placeholder="····" autocomplete="current-password">
-      <div id="login-error"></div>
-      <button id="login-btn">Войти</button>
-    </div>
+  </div>
+
+  <!-- ── WELCOME ───────────────────────────────────────── -->
+  <div id="v-welcome" class="view">
+    <div class="welcome-emoji">💪</div>
+    <p class="welcome-text">Игорь, добро пожаловать,<br>готов начать тренировку?</p>
+    <button id="welcome-btn" class="welcome-btn">Начать тренировку</button>
   </div>
 
   <!-- ── MAIN APP ──────────────────────────────────────── -->
   <div id="v-app" class="view">
     <header class="app-header">
-      <div class="header-title" id="header-title">Тренировки</div>
+      <div class="header-title" id="header-title">Тренировка</div>
       <button class="header-btn" id="logout-btn">Выход</button>
     </header>
 
@@ -471,8 +589,7 @@
             <div class="export-info-title">📥 Экспорт в Obsidian</div>
             <div class="export-info-desc">
               Скачайте файл <strong>workout_history.md</strong> и перенесите его
-              в папку вашего хранилища Obsidian. Файл содержит полную хронологию
-              всех тренировок в формате Markdown.
+              в папку вашего хранилища Obsidian.
             </div>
           </div>
           <button class="export-btn" id="export-btn">
@@ -492,7 +609,6 @@
 
     </div><!-- /tab-content -->
 
-    <!-- Tab Bar -->
     <nav class="tab-bar">
       <button class="tab-item active" data-tab="workout">
         <span class="tab-icon">🏋️</span>
@@ -509,6 +625,16 @@
     </nav>
   </div><!-- /v-app -->
 
+  <!-- ── THANKS ─────────────────────────────────────────── -->
+  <div id="v-thanks" class="view">
+    <div class="thanks-video-wrap">
+      <video id="thanks-video" autoplay muted loop playsinline class="thanks-video">
+        <source src="/static/video/circle_video.webm" type="video/webm">
+      </video>
+    </div>
+    <p id="thanks-phrase" class="thanks-phrase"></p>
+  </div>
+
 </div><!-- /app -->
 
 <div id="toast"></div>
@@ -516,16 +642,16 @@
 <script>
 /* ── State ────────────────────────────────────────────── */
 const S = {
-  sessionId:    null,
-  workoutType:  null,   // 'A' | 'B'
-  exercises:    {},     // EXERCISES from server
-  saved:        new Set(),  // saved exercise nums (1-based)
-  // in-memory form data: S.inputs[exNum][setNum] = {weight, reps}
+  sessionId:   null,
+  workoutType: null,
+  exercises:   {},
+  saved:       new Set(),
+  lastResults: {},   // {exerciseName: {date, sets:[{set_num,weight,reps}]}}
 };
 
 /* ── Utils ────────────────────────────────────────────── */
 function today() {
-  return new Date().toLocaleDateString('en-CA');  // YYYY-MM-DD
+  return new Date().toLocaleDateString('en-CA');
 }
 
 function showToast(msg, duration = 1800) {
@@ -539,27 +665,22 @@ async function api(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(path, opts);
-  if (!r.ok && r.status === 401) { showView('login'); return null; }
+  if (r.status === 401) { showView('login'); resetLoginScreen(); return null; }
   return r.ok ? r.json() : null;
 }
 
-/* ── Views ───────────────────────────────────────────── */
 function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(`v-${name}`).classList.add('active');
 }
 
-/* ── Tabs ────────────────────────────────────────────── */
 function switchTab(tabName) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   document.getElementById(`tab-${tabName}`).classList.add('active');
   document.querySelector(`.tab-item[data-tab="${tabName}"]`).classList.add('active');
-
-  // Update header title
   const titles = { workout: 'Тренировка', history: 'История', export: 'Экспорт' };
   document.getElementById('header-title').textContent = titles[tabName];
-
   if (tabName === 'history') loadHistory();
 }
 
@@ -567,61 +688,154 @@ document.querySelectorAll('.tab-item').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 
-/* ── Login ───────────────────────────────────────────── */
-async function doLogin() {
-  const pwd = document.getElementById('login-input').value;
+function formatDate(iso) {
+  const [y, m, d] = iso.split('-');
+  const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  const days = ['вс','пн','вт','ср','чт','пт','сб'];
+  const dt = new Date(+y, +m-1, +d);
+  return `${+d} ${months[+m-1]} ${y}, ${days[dt.getDay()]}`;
+}
+
+/* ── Login page setup ─────────────────────────────────── */
+async function loadLoginPageData() {
+  try {
+    const r = await fetch('/api/login-page-data');
+    const data = await r.json();
+    document.getElementById('login-photo').src = `/static/images/moto${data.photo_num}.png`;
+    document.getElementById('login-slogan').textContent = data.slogan;
+    if (data.locked) {
+      lockPinInput('Возможность снова вводить пароль будет доступна через 30 минут');
+    }
+  } catch(e) {}
+}
+
+function resetLoginScreen() {
+  const input = document.getElementById('login-input');
+  input.value = '';
+  input.disabled = false;
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('login-error').className = 'login-error';
+  updatePinDisplay('');
+  loadLoginPageData();
+}
+
+function lockPinInput(msg) {
+  const input = document.getElementById('login-input');
+  input.disabled = true;
+  input.value = '';
+  updatePinDisplay('');
   const errEl = document.getElementById('login-error');
-  errEl.textContent = '';
+  errEl.textContent = msg;
+  errEl.className = 'login-error locked';
+}
 
-  const btn = document.getElementById('login-btn');
-  btn.textContent = '...';
-  btn.disabled = true;
-
-  const data = await api('POST', '/api/login', { password: pwd });
-  btn.textContent = 'Войти';
-  btn.disabled = false;
-
-  if (data?.ok) {
-    showView('app');
-    await loadExercisesData();
-    initWorkoutTab();
-  } else {
-    errEl.textContent = 'Неверный пароль';
-    document.getElementById('login-input').value = '';
-    document.getElementById('login-input').focus();
+function updatePinDisplay(value) {
+  for (let i = 1; i <= 4; i++) {
+    const box = document.getElementById(`pb${i}`);
+    box.classList.toggle('filled', i <= value.length);
   }
 }
 
-document.getElementById('login-btn').addEventListener('click', doLogin);
-document.getElementById('login-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
+/* ── PIN input handling ──────────────────────────────── */
+const pinInput = document.getElementById('login-input');
+const pinWidget = document.getElementById('pin-widget');
+
+pinWidget.addEventListener('click', () => pinInput.focus());
+
+pinInput.addEventListener('input', e => {
+  const val = e.target.value;
+  updatePinDisplay(val);
+  if (val.length === 4) doLogin();
+});
+
+async function doLogin() {
+  const input = document.getElementById('login-input');
+  const pwd = input.value;
+  if (pwd.length < 4) return;
+
+  input.disabled = true;
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+  errEl.className = 'login-error';
+
+  let resp, data;
+  try {
+    resp = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    });
+    data = await resp.json();
+  } catch(e) {
+    input.disabled = false;
+    input.value = '';
+    updatePinDisplay('');
+    return;
+  }
+
+  if (data.ok) {
+    input.value = '';
+    updatePinDisplay('');
+    input.disabled = false;
+    await postLoginSetup();
+  } else if (data.locked) {
+    lockPinInput(data.error);
+  } else {
+    // Wrong but not locked yet
+    input.value = '';
+    updatePinDisplay('');
+    input.disabled = false;
+    errEl.textContent = data.error;  // "Осталась еще одна попытка"
+    errEl.className = 'login-error';
+    input.focus();
+  }
+}
+
+/* ── Post-login setup ────────────────────────────────── */
+async function postLoginSetup() {
+  const [exercisesData, lastResultsData, activeSessionData] = await Promise.all([
+    api('GET', '/api/exercises'),
+    api('GET', '/api/last-results'),
+    api('GET', '/api/active-session'),
+  ]);
+
+  if (exercisesData)  S.exercises    = exercisesData;
+  if (lastResultsData) S.lastResults = lastResultsData;
+
+  if (activeSessionData?.session) {
+    await resumeActiveSession(activeSessionData.session);
+  } else {
+    showView('welcome');
+  }
+}
+
+/* ── Welcome screen ──────────────────────────────────── */
+document.getElementById('welcome-btn').addEventListener('click', () => {
+  showView('app');
+  switchTab('workout');
+  initWorkoutTab();
 });
 
 /* ── Logout ──────────────────────────────────────────── */
 document.getElementById('logout-btn').addEventListener('click', async () => {
   await api('POST', '/api/logout');
-  showView('login');
-  document.getElementById('login-input').value = '';
-  document.getElementById('login-error').textContent = '';
-  S.sessionId = null;
+  S.sessionId  = null;
   S.workoutType = null;
   S.saved.clear();
+  S.lastResults = {};
+  _workoutTabInited = false;
+  showView('login');
+  resetLoginScreen();
 });
-
-/* ── Load exercises from server ─────────────────────── */
-async function loadExercisesData() {
-  const data = await api('GET', '/api/exercises');
-  if (data) S.exercises = data;
-}
 
 /* ── Workout Tab ─────────────────────────────────────── */
 let _workoutTabInited = false;
+
 function initWorkoutTab() {
   const dateInput = document.getElementById('date-input');
   dateInput.value = today();
   dateInput.max = today();
 
-  // Добавляем listeners только один раз — чтобы не накапливались при повторном входе
   if (!_workoutTabInited) {
     dateInput.addEventListener('change', onDateOrTypeChange);
     document.getElementById('pill-a').addEventListener('click', () => selectType('A'));
@@ -634,15 +848,36 @@ function initWorkoutTab() {
   suggestAndLoad();
 }
 
+async function resumeActiveSession(sess) {
+  showView('app');
+  switchTab('workout');
+
+  const dateInput = document.getElementById('date-input');
+  dateInput.value = sess.date;
+  dateInput.max = today();
+
+  if (!_workoutTabInited) {
+    dateInput.addEventListener('change', onDateOrTypeChange);
+    document.getElementById('pill-a').addEventListener('click', () => selectType('A'));
+    document.getElementById('pill-b').addEventListener('click', () => selectType('B'));
+    _workoutTabInited = true;
+  }
+
+  S.workoutType = sess.workout_type;
+  S.saved.clear();
+
+  const pillA = document.getElementById('pill-a');
+  const pillB = document.getElementById('pill-b');
+  pillA.className = 'type-pill' + (sess.workout_type === 'A' ? ' active-a' : '');
+  pillB.className = 'type-pill' + (sess.workout_type === 'B' ? ' active-b' : '');
+
+  await loadSession();
+}
+
 async function suggestAndLoad() {
   const d = document.getElementById('date-input').value;
   const data = await api('GET', `/api/suggest?date=${d}`);
-  if (data?.suggested) {
-    selectType(data.suggested, false);
-  } else {
-    // Non-workout day — still allow manual selection
-    selectType('A', false);
-  }
+  selectType(data?.suggested || 'A', false);
 }
 
 function onDateOrTypeChange() {
@@ -673,14 +908,12 @@ async function loadSession() {
   S.sessionId = data.session_id;
   S.saved.clear();
 
-  // Build lookup of saved sets
-  const savedSets = {};  // {exNum: {setNum: {weight, reps}}}
+  const savedSets = {};
   for (const s of data.sets) {
     if (!savedSets[s.exercise_num]) savedSets[s.exercise_num] = {};
     savedSets[s.exercise_num][s.set_num] = { weight: s.weight, reps: s.reps };
   }
 
-  // Figure out which exercises are fully saved (all 3 sets present)
   const exList = S.exercises[S.workoutType] || [];
   exList.forEach((_, idx) => {
     const exNum = idx + 1;
@@ -689,7 +922,7 @@ async function loadSession() {
   });
 
   badge.textContent = data.sets.length > 0
-    ? `✓ Загружено сохранений: ${Object.keys(savedSets).length}`
+    ? `✓ Загружено: ${Object.keys(savedSets).length} упр.`
     : '';
   badge.className = 'session-badge' + (data.sets.length > 0 ? ' loaded' : '');
 
@@ -699,12 +932,14 @@ async function loadSession() {
 function renderExercises(savedSets = {}) {
   const container = document.getElementById('exercises-list');
   const exList = S.exercises[S.workoutType] || [];
+
   if (!exList.length) {
     container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3);font-size:14px;">Нет данных</div>';
     return;
   }
 
   container.innerHTML = '';
+
   exList.forEach((name, idx) => {
     const exNum = idx + 1;
     const isSaved = S.saved.has(exNum);
@@ -722,28 +957,23 @@ function renderExercises(savedSets = {}) {
       <div class="ex-name">${name}</div>`;
     card.appendChild(header);
 
-    // Card body: sets grid + exercise image side by side
+    // Card body: sets grid + exercise image
     const cardBody = document.createElement('div');
     cardBody.className = 'ex-card-body';
 
     const grid = document.createElement('div');
     grid.className = 'sets-grid';
 
-    // Column headers (3 columns)
+    // Column headers — no set number column
     grid.innerHTML = `
-      <div class="sets-col-header">№</div>
-      <div class="sets-col-header" style="text-align:center">кг</div>
-      <div class="sets-col-header" style="text-align:center">повт.</div>`;
+      <div class="sets-col-header">кг</div>
+      <div class="sets-col-header">повт.</div>`;
 
-    // 3 set rows
+    // 3 set rows (without set number label)
     for (let setNum = 1; setNum <= 3; setNum++) {
       const saved = exSets[setNum];
       const wVal = saved?.weight ?? '';
       const rVal = saved?.reps ?? '';
-
-      const numLabel = document.createElement('div');
-      numLabel.className = 'set-num-label';
-      numLabel.textContent = setNum;
 
       const wInput = document.createElement('input');
       wInput.type = 'number';
@@ -776,7 +1006,6 @@ function renderExercises(savedSets = {}) {
         onSetInput(e);
       });
 
-      grid.appendChild(numLabel);
       grid.appendChild(wInput);
       grid.appendChild(rInput);
     }
@@ -791,6 +1020,12 @@ function renderExercises(savedSets = {}) {
     cardBody.appendChild(exImg);
     card.appendChild(cardBody);
 
+    // Last results hint block
+    const lastEl = document.createElement('div');
+    lastEl.className = 'ex-last-result';
+    lastEl.id = `last-${exNum}`;
+    card.appendChild(lastEl);
+
     // Footer with save button
     const footer = document.createElement('div');
     footer.className = 'ex-footer';
@@ -804,6 +1039,51 @@ function renderExercises(savedSets = {}) {
     card.appendChild(footer);
 
     container.appendChild(card);
+  });
+
+  // Add "Завершить тренировку" button at the bottom
+  const finishWrap = document.createElement('div');
+  finishWrap.className = 'finish-workout-wrap';
+  const finishBtn = document.createElement('button');
+  finishBtn.className = 'finish-workout-btn';
+  finishBtn.textContent = '✓ Завершить тренировку';
+  finishBtn.addEventListener('click', finishWorkout);
+  finishWrap.appendChild(finishBtn);
+  container.appendChild(finishWrap);
+
+  // Populate last results
+  populateLastResults();
+}
+
+function populateLastResults() {
+  const exList = S.exercises[S.workoutType] || [];
+  exList.forEach((name, idx) => {
+    const exNum = idx + 1;
+    const lastEl = document.getElementById(`last-${exNum}`);
+    if (!lastEl) return;
+
+    const data = S.lastResults[name];
+    if (!data || !data.sets || data.sets.length === 0) {
+      lastEl.style.display = 'none';
+      return;
+    }
+
+    lastEl.innerHTML = '';
+    const label = document.createElement('span');
+    label.className = 'ex-last-label';
+    label.textContent = formatDate(data.date) + ':';
+    lastEl.appendChild(label);
+
+    data.sets.forEach(s => {
+      const chip = document.createElement('span');
+      chip.className = 'ex-last-chip';
+      const w = s.weight != null ? `${s.weight} кг` : '—';
+      const r = s.reps   != null ? `${s.reps} ×`   : '—';
+      chip.textContent = `С${s.set_num}: ${r} ${w}`;
+      lastEl.appendChild(chip);
+    });
+
+    lastEl.style.display = 'flex';
   });
 }
 
@@ -844,22 +1124,51 @@ async function saveExercise(exNum) {
     btn.classList.add('saved');
     btn.textContent = '✓ Сохранено';
     const numEl = document.getElementById(`ex-num-${exNum}`);
-    if (numEl) { numEl.classList.add('saved-num'); }
+    if (numEl) numEl.classList.add('saved-num');
     showToast(`Упражнение ${exNum} сохранено`);
+    const badge = document.getElementById('session-badge');
+    badge.textContent = `✓ Сохранено: ${S.saved.size} упр.`;
+    badge.className = 'session-badge loaded';
     setTimeout(() => {
       btn.classList.remove('saved');
       btn.textContent = 'Сохранить';
     }, 1500);
-
-    // Update badge
-    const badge = document.getElementById('session-badge');
-    badge.textContent = `✓ Сохранено упражнений: ${S.saved.size}`;
-    badge.className = 'session-badge loaded';
   } else {
     btn.classList.remove('saving');
     btn.textContent = 'Сохранить';
     showToast('Ошибка сохранения', 2500);
   }
+}
+
+/* ── Finish workout ──────────────────────────────────── */
+async function finishWorkout() {
+  if (!S.sessionId) {
+    showToast('Нет активной тренировки', 2500);
+    return;
+  }
+
+  await api('POST', `/api/session/${S.sessionId}/complete`);
+
+  const phraseData = await api('GET', '/api/random-phrase');
+  const phrase = phraseData?.phrase || 'Отличная работа!';
+
+  document.getElementById('thanks-phrase').textContent = phrase;
+
+  // Restart video from beginning
+  const video = document.getElementById('thanks-video');
+  video.currentTime = 0;
+  video.play().catch(() => {});
+
+  S.sessionId = null;
+  S.saved.clear();
+
+  showView('thanks');
+
+  // Auto-redirect to history after 20 seconds
+  setTimeout(() => {
+    showView('app');
+    switchTab('history');
+  }, 20000);
 }
 
 /* ── History Tab ─────────────────────────────────────── */
@@ -912,7 +1221,6 @@ async function loadHistory() {
     const header = document.createElement('div');
     header.className = 'history-card-header';
 
-    // Group sets by exercise
     const byEx = {};
     for (const s of sess.sets) {
       const key = s.exercise_num;
@@ -957,27 +1265,14 @@ async function loadHistory() {
     card.appendChild(body);
 
     header.addEventListener('click', () => {
-      const isSelected = card.classList.contains('selected');
-      // toggle expand
       card.classList.toggle('open');
-      // toggle selection
-      if (isSelected) {
-        setSelectedSession(null);
-      } else {
-        setSelectedSession(sess.id);
-      }
+      const isSelected = card.classList.contains('selected');
+      setSelectedSession(isSelected ? null : sess.id);
+      if (!isSelected) card.classList.add('selected');
     });
 
     container.appendChild(card);
   });
-}
-
-function formatDate(iso) {
-  const [y, m, d] = iso.split('-');
-  const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
-  const days = ['вс','пн','вт','ср','чт','пт','сб'];
-  const dt = new Date(+y, +m-1, +d);
-  return `${+d} ${months[+m-1]} ${y}, ${days[dt.getDay()]}`;
 }
 
 /* ── Export Tab ──────────────────────────────────────── */
@@ -985,12 +1280,14 @@ document.getElementById('export-btn').addEventListener('click', () => {
   window.location.href = '/api/export';
 });
 
-/* ── Date input: prevent future dates ───────────────── */
+/* ── Date input ──────────────────────────────────────── */
 document.getElementById('date-input').addEventListener('change', function() {
   if (this.value > today()) this.value = today();
   suggestAndLoad();
 });
 
+/* ── Init ────────────────────────────────────────────── */
+loadLoginPageData();
 </script>
 </body>
 </html>

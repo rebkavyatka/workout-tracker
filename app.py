@@ -15,21 +15,40 @@ DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'workouts.db'
 
 EXERCISES = {
     'A': [
-        'Жим гантелей на наклонной скамье от груди',
-        'Тяга штанги к животу в наклоне обратным хватом',
-        'Разведение гантелей на плечи',
-        'Пулловер с одной гантелью лёжа поперёк скамьи',
-        'Приседания с одной гантелью у груди',
-        'Румынская тяга со штангой до колен',
+        {'nameRu': 'Жим гантелей на наклонной скамье от груди',  'setsCount': 3, 'trackingType': 'weight_reps', 'icon': '/static/images/a1.png'},
+        {'nameRu': 'Тяга штанги к животу в наклоне обратным хватом', 'setsCount': 3, 'trackingType': 'weight_reps', 'icon': '/static/images/a2.png'},
+        {'nameRu': 'Разведение гантелей на плечи',                'setsCount': 3, 'trackingType': 'weight_reps', 'icon': '/static/images/a3.png'},
+        {'nameRu': 'Пулловер с одной гантелью лёжа поперёк скамьи', 'setsCount': 3, 'trackingType': 'weight_reps', 'icon': '/static/images/a4.png'},
+        {'nameRu': 'Приседания с одной гантелью у груди',          'setsCount': 3, 'trackingType': 'weight_reps', 'icon': '/static/images/a5.png'},
+        {'nameRu': 'Румынская тяга со штангой до колен',           'setsCount': 3, 'trackingType': 'weight_reps', 'icon': '/static/images/a6.png'},
     ],
     'B': [
-        'Жим на трицепс на брусьях',
-        'Тяга на кроссовере одной рукой сверху',
-        'Отведение одной рукой на плечо',
-        'Подъём штанги на бицепс',
-        'Зашагивание назад с гантелями на одной ноге',
-        'Сгибание ног в тренажёре на бицепс бедра',
-    ]
+        {'nameRu': 'Жим на трицепс на брусьях',                   'setsCount': 3, 'trackingType': 'weight_reps', 'icon': '/static/images/b1.png'},
+        {'nameRu': 'Тяга на кроссовере одной рукой сверху',        'setsCount': 3, 'trackingType': 'weight_reps', 'icon': '/static/images/b2.png'},
+        {'nameRu': 'Отведение одной рукой на плечо',              'setsCount': 3, 'trackingType': 'weight_reps', 'icon': '/static/images/b3.png'},
+        {'nameRu': 'Подъём штанги на бицепс',                     'setsCount': 3, 'trackingType': 'weight_reps', 'icon': '/static/images/b4.png'},
+        {'nameRu': 'Зашагивание назад с гантелями на одной ноге',  'setsCount': 3, 'trackingType': 'weight_reps', 'icon': '/static/images/b5.png'},
+        {'nameRu': 'Сгибание ног в тренажёре на бицепс бедра',     'setsCount': 3, 'trackingType': 'weight_reps', 'icon': '/static/images/b6.png'},
+    ],
+    'C': [
+        {'nameRu': 'Вис на турнике',                              'setsCount': 3, 'trackingType': 'time',         'icon': '/static/images/3/dead-hang.webp'},
+        {'nameRu': 'Кошка-корова',                                'setsCount': 2, 'trackingType': 'reps',         'icon': '/static/images/3/cat-cow.webp'},
+        {'nameRu': '90/90 Hip Mobility',                          'setsCount': 2, 'trackingType': 'reps',         'icon': '/static/images/3/hip-90-90.webp'},
+        {'nameRu': 'Растяжка сгибателей бедра у стены',           'setsCount': 2, 'trackingType': 'time',         'icon': '/static/images/3/hip-flexor-stretch.webp'},
+        {'nameRu': 'Bird Dog',                                    'setsCount': 2, 'trackingType': 'reps',         'icon': '/static/images/3/bird-dog.webp'},
+        {'nameRu': 'Боковая планка',                              'setsCount': 2, 'trackingType': 'time',         'icon': '/static/images/3/side-plank.webp'},
+        {'nameRu': 'Разведение бедра',                            'setsCount': 2, 'trackingType': 'weight_reps',  'icon': '/static/images/3/placeholder.webp'},
+        {'nameRu': 'Статическое удержание корпуса под 45\u00b0',  'setsCount': 2, 'trackingType': 'time',         'icon': '/static/images/3/back-extension-hold.webp'},
+        {'nameRu': 'Гиперэкстензия',                              'setsCount': 2, 'trackingType': 'weight_reps',  'icon': '/static/images/3/back-extension.webp'},
+    ],
+    'D': [
+        {'nameRu': 'Wall Angels',                                 'setsCount': 2, 'trackingType': 'reps',         'icon': '/static/images/3/placeholder.webp'},
+        {'nameRu': 'Продевание иглы',                             'setsCount': 2, 'trackingType': 'reps',         'icon': '/static/images/3/thread-needle.webp'},
+        {'nameRu': 'Ягодичный мостик на скамье',                  'setsCount': 2, 'trackingType': 'weight_reps',  'icon': '/static/images/3/placeholder.webp'},
+        {'nameRu': 'Копенгагенская планка',                       'setsCount': 2, 'trackingType': 'time',         'icon': '/static/images/3/placeholder.webp'},
+        {'nameRu': 'Вис на турнике',                              'setsCount': 2, 'trackingType': 'time',         'icon': '/static/images/3/dead-hang.webp'},
+        {'nameRu': 'Проходка с гантелью',                         'setsCount': 2, 'trackingType': 'weight_time',  'icon': '/static/images/3/placeholder.webp'},
+    ],
 }
 
 REFERENCE_MONDAY = date(2026, 3, 2)
@@ -91,6 +110,7 @@ def init_db():
             set_num       INTEGER NOT NULL,
             weight        REAL,
             reps          INTEGER,
+            time_sec      INTEGER,
             saved_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (session_id) REFERENCES workout_sessions(id),
             UNIQUE(session_id, exercise_num, set_num)
@@ -101,12 +121,16 @@ def init_db():
             locked_until  TEXT
         );
     ''')
-    # Safe migration: add completed column if missing (existing DBs)
-    try:
-        conn.execute('ALTER TABLE workout_sessions ADD COLUMN completed INTEGER NOT NULL DEFAULT 0')
-        conn.commit()
-    except Exception:
-        pass  # Column already exists
+    # Safe migrations for existing DBs
+    for migration in [
+        'ALTER TABLE workout_sessions ADD COLUMN completed INTEGER NOT NULL DEFAULT 0',
+        'ALTER TABLE exercise_sets ADD COLUMN time_sec INTEGER',
+    ]:
+        try:
+            conn.execute(migration)
+            conn.commit()
+        except Exception:
+            pass  # Column already exists
     conn.commit()
     conn.close()
 
@@ -308,7 +332,7 @@ def get_or_create_session():
         session_id = c.fetchone()['id']
 
         c.execute(
-            '''SELECT exercise_num, set_num, weight, reps
+            '''SELECT exercise_num, set_num, weight, reps, time_sec
                FROM exercise_sets WHERE session_id=?
                ORDER BY exercise_num, set_num''',
             (session_id,)
@@ -334,10 +358,10 @@ def save_exercise():
         for s in sets:
             c.execute(
                 '''INSERT OR REPLACE INTO exercise_sets
-                   (session_id, exercise_num, exercise_name, set_num, weight, reps)
-                   VALUES (?, ?, ?, ?, ?, ?)''',
+                   (session_id, exercise_num, exercise_name, set_num, weight, reps, time_sec)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)''',
                 (session_id, exercise_num, exercise_name,
-                 s['set_num'], s.get('weight'), s.get('reps'))
+                 s['set_num'], s.get('weight'), s.get('reps'), s.get('time_sec'))
             )
         conn.commit()
         return jsonify({'ok': True})
@@ -353,7 +377,7 @@ def last_results():
     try:
         c = conn.cursor()
         c.execute('''
-            SELECT es.exercise_name, ws.date, es.set_num, es.weight, es.reps
+            SELECT es.exercise_name, ws.date, es.set_num, es.weight, es.reps, es.time_sec
             FROM exercise_sets es
             JOIN workout_sessions ws ON ws.id = es.session_id
             ORDER BY ws.date DESC, es.exercise_name, es.set_num
@@ -368,7 +392,8 @@ def last_results():
                 result[name]['sets'].append({
                     'set_num': row['set_num'],
                     'weight': row['weight'],
-                    'reps': row['reps']
+                    'reps': row['reps'],
+                    'time_sec': row['time_sec']
                 })
         return jsonify(result)
     finally:
@@ -385,7 +410,7 @@ def history():
         sessions = [dict(row) for row in c.fetchall()]
         for sess in sessions:
             c.execute(
-                '''SELECT exercise_num, exercise_name, set_num, weight, reps
+                '''SELECT exercise_num, exercise_name, set_num, weight, reps, time_sec
                    FROM exercise_sets WHERE session_id=?
                    ORDER BY exercise_num, set_num''',
                 (sess['id'],)
@@ -439,15 +464,21 @@ def export_md():
             for ex in exercises:
                 lines.append(f"### {ex['exercise_num']}. {ex['exercise_name']}\n\n")
                 c.execute(
-                    '''SELECT set_num, weight, reps FROM exercise_sets
+                    '''SELECT set_num, weight, reps, time_sec FROM exercise_sets
                        WHERE session_id=? AND exercise_num=?
                        ORDER BY set_num''',
                     (sess['id'], ex['exercise_num'])
                 )
                 for s in c.fetchall():
-                    w = f"{s['weight']} кг" if s['weight'] is not None else '—'
-                    r = f"{s['reps']} повт." if s['reps'] is not None else '—'
-                    lines.append(f"- Сет {s['set_num']}: {w} × {r}\n")
+                    parts = []
+                    if s['weight'] is not None:
+                        parts.append(f"{s['weight']} кг")
+                    if s['reps'] is not None:
+                        parts.append(f"{s['reps']} повт.")
+                    if s['time_sec'] is not None:
+                        parts.append(f"{s['time_sec']} сек")
+                    val = ' × '.join(parts) if parts else '—'
+                    lines.append(f"- Сет {s['set_num']}: {val}\n")
                 lines.append('\n')
             lines.append('\n')
 

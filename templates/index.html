@@ -270,6 +270,8 @@
   }
   .type-pill.active-a { background: var(--primary); color: #fff; border-color: var(--primary); }
   .type-pill.active-b { background: #FF9500; color: #fff; border-color: #FF9500; }
+  .type-pill.active-c { background: #30D158; color: #fff; border-color: #30D158; }
+  .type-pill.active-d { background: #BF5AF2; color: #fff; border-color: #BF5AF2; }
   .session-badge { font-size: 11px; color: var(--text3); padding: 2px 0; }
   .session-badge.loaded { color: var(--success); }
 
@@ -312,14 +314,18 @@
     background: var(--fill4);
   }
 
-  /* Sets grid — kg / reps / history (3 columns) */
+  /* Sets grid — dynamic columns depending on trackingType */
   .sets-grid {
     display: grid;
-    grid-template-columns: 62px 62px 50px;
+    grid-template-columns: 62px 62px 50px; /* weight_reps / weight_time default */
     align-items: center;
     gap: 4px 8px;
     padding: 6px 6px 4px 10px;
     flex: 1;
+  }
+  /* 2-column grid: single value + history (reps-only or time-only) */
+  .sets-grid.grid-2col {
+    grid-template-columns: 110px 50px;
   }
   .sets-col-header {
     font-size: 10px; font-weight: 600;
@@ -413,6 +419,8 @@
   }
   .badge-a { background: var(--primary); }
   .badge-b { background: #FF9500; }
+  .badge-c { background: #30D158; }
+  .badge-d { background: #BF5AF2; }
   .history-chevron { color: var(--text3); font-size: 12px; transition: transform .25s; line-height: 1; }
   .history-card.open .history-chevron { transform: rotate(180deg); }
   .history-body { display: none; border-top: 1px solid var(--sep); padding: 10px 14px; }
@@ -561,6 +569,8 @@
             <div class="type-pills">
               <button class="type-pill" id="pill-a" data-type="A">А</button>
               <button class="type-pill" id="pill-b" data-type="B">Б</button>
+              <button class="type-pill" id="pill-c" data-type="C">В</button>
+              <button class="type-pill" id="pill-d" data-type="D">Г</button>
             </div>
             <span class="session-badge" id="session-badge"></span>
           </div>
@@ -860,8 +870,9 @@ function initWorkoutTab() {
 
   if (!_workoutTabInited) {
     dateInput.addEventListener('change', onDateOrTypeChange);
-    document.getElementById('pill-a').addEventListener('click', () => selectType('A'));
-    document.getElementById('pill-b').addEventListener('click', () => selectType('B'));
+    ['A','B','C','D'].forEach(t =>
+      document.getElementById(`pill-${t.toLowerCase()}`).addEventListener('click', () => selectType(t))
+    );
     _workoutTabInited = true;
   }
 
@@ -880,18 +891,15 @@ async function resumeActiveSession(sess) {
 
   if (!_workoutTabInited) {
     dateInput.addEventListener('change', onDateOrTypeChange);
-    document.getElementById('pill-a').addEventListener('click', () => selectType('A'));
-    document.getElementById('pill-b').addEventListener('click', () => selectType('B'));
+    ['A','B','C','D'].forEach(t =>
+      document.getElementById(`pill-${t.toLowerCase()}`).addEventListener('click', () => selectType(t))
+    );
     _workoutTabInited = true;
   }
 
   S.workoutType = sess.workout_type;
   S.saved.clear();
-
-  const pillA = document.getElementById('pill-a');
-  const pillB = document.getElementById('pill-b');
-  pillA.className = 'type-pill' + (sess.workout_type === 'A' ? ' active-a' : '');
-  pillB.className = 'type-pill' + (sess.workout_type === 'B' ? ' active-b' : '');
+  selectType(sess.workout_type, false);
 
   await loadSession();
 }
@@ -906,12 +914,16 @@ function onDateOrTypeChange() {
   suggestAndLoad();
 }
 
+function typeLabel(t) {
+  return { A: 'А', B: 'Б', C: 'В', D: 'Г' }[t] || t;
+}
+
 function selectType(type, autoLoad = true) {
   S.workoutType = type;
-  const pillA = document.getElementById('pill-a');
-  const pillB = document.getElementById('pill-b');
-  pillA.className = 'type-pill' + (type === 'A' ? ' active-a' : '');
-  pillB.className = 'type-pill' + (type === 'B' ? ' active-b' : '');
+  ['a', 'b', 'c', 'd'].forEach(t => {
+    const pill = document.getElementById(`pill-${t}`);
+    if (pill) pill.className = 'type-pill' + (type === t.toUpperCase() ? ` active-${t}` : '');
+  });
   if (autoLoad || S.sessionId === null) loadSession();
 }
 
@@ -933,14 +945,14 @@ async function loadSession() {
   const savedSets = {};
   for (const s of data.sets) {
     if (!savedSets[s.exercise_num]) savedSets[s.exercise_num] = {};
-    savedSets[s.exercise_num][s.set_num] = { weight: s.weight, reps: s.reps };
+    savedSets[s.exercise_num][s.set_num] = { weight: s.weight, reps: s.reps, time_sec: s.time_sec };
   }
 
   const exList = S.exercises[S.workoutType] || [];
-  exList.forEach((_, idx) => {
+  exList.forEach((ex, idx) => {
     const exNum = idx + 1;
     const sets = savedSets[exNum];
-    if (sets && Object.keys(sets).length === 3) S.saved.add(exNum);
+    if (sets && Object.keys(sets).length >= ex.setsCount) S.saved.add(exNum);
   });
 
   badge.textContent = data.sets.length > 0
@@ -949,6 +961,27 @@ async function loadSession() {
   badge.className = 'session-badge' + (data.sets.length > 0 ? ' loaded' : '');
 
   renderExercises(savedSets);
+}
+
+/* ── Helpers for trackingType ─────────────────────────── */
+// Returns column headers array for a given trackingType
+function gridHeaders(tt) {
+  if (tt === 'reps')        return ['повт.', 'Ист.'];
+  if (tt === 'time')        return ['сек',   'Ист.'];
+  if (tt === 'weight_reps') return ['кг', 'повт.', 'Ист.'];
+  if (tt === 'weight_time') return ['кг', 'сек',   'Ист.'];
+  return ['кг', 'повт.', 'Ист.'];
+}
+
+// Format history cell text from a set row
+function histCellText(histSet, tt) {
+  if (!histSet) return '';
+  const w = histSet.weight, r = histSet.reps, t = histSet.time_sec;
+  if (tt === 'reps')        return r != null ? `${r}` : '';
+  if (tt === 'time')        return t != null ? `${t}с` : '';
+  if (tt === 'weight_reps') return (w != null && r != null) ? `${w}×${r}` : '';
+  if (tt === 'weight_time') return (w != null && t != null) ? `${w}×${t}с` : '';
+  return '';
 }
 
 function renderExercises(savedSets = {}) {
@@ -962,10 +995,14 @@ function renderExercises(savedSets = {}) {
 
   container.innerHTML = '';
 
-  exList.forEach((name, idx) => {
-    const exNum = idx + 1;
+  exList.forEach((ex, idx) => {
+    const exNum   = idx + 1;
+    const name    = ex.nameRu;
+    const tt      = ex.trackingType;
+    const nSets   = ex.setsCount;
     const isSaved = S.saved.has(exNum);
-    const exSets = savedSets[exNum] || {};
+    const exSets  = savedSets[exNum] || {};
+    const is2col  = (tt === 'reps' || tt === 'time');
 
     const card = document.createElement('div');
     card.className = 'ex-card';
@@ -984,73 +1021,83 @@ function renderExercises(savedSets = {}) {
     cardBody.className = 'ex-card-body';
 
     const grid = document.createElement('div');
-    grid.className = 'sets-grid';
+    grid.className = 'sets-grid' + (is2col ? ' grid-2col' : '');
 
-    // Column headers: кг / повт. / Ист.
-    grid.innerHTML = `
-      <div class="sets-col-header">кг</div>
-      <div class="sets-col-header">повт.</div>
-      <div class="sets-col-header">Ист.</div>`;
+    // Column headers
+    gridHeaders(tt).forEach(h => {
+      const hEl = document.createElement('div');
+      hEl.className = 'sets-col-header';
+      hEl.textContent = h;
+      grid.appendChild(hEl);
+    });
 
     // Last history data for this exercise
     const lastForEx = S.lastResults[name];
 
-    // 3 set rows
-    for (let setNum = 1; setNum <= 3; setNum++) {
+    // Set rows (variable count)
+    for (let setNum = 1; setNum <= nSets; setNum++) {
       const saved = exSets[setNum];
-      const wVal = saved?.weight ?? '';
-      const rVal = saved?.reps ?? '';
 
-      const wInput = document.createElement('input');
-      wInput.type = 'number';
-      wInput.inputMode = 'decimal';
-      wInput.min = 0; wInput.max = 999;
-      wInput.step = '0.5';
-      wInput.className = 'set-input' + (wVal !== '' ? ' filled' : '');
-      wInput.value = wVal;
-      wInput.placeholder = '0';
-      wInput.id = `w-${exNum}-${setNum}`;
-      wInput.dataset.ex = exNum;
-      wInput.dataset.set = setNum;
-      wInput.addEventListener('input', e => {
-        if (e.target.value.length > 4) e.target.value = e.target.value.slice(0, 4);
-        onSetInput(e);
-      });
+      if (tt === 'weight_reps' || tt === 'weight_time') {
+        // Weight input
+        const wVal = saved?.weight ?? '';
+        const wInput = document.createElement('input');
+        wInput.type = 'number'; wInput.inputMode = 'decimal';
+        wInput.min = 0; wInput.max = 999; wInput.step = '0.5';
+        wInput.className = 'set-input' + (wVal !== '' ? ' filled' : '');
+        wInput.value = wVal; wInput.placeholder = '0';
+        wInput.id = `w-${exNum}-${setNum}`;
+        wInput.addEventListener('input', e => {
+          if (e.target.value.length > 4) e.target.value = e.target.value.slice(0, 4);
+          onSetInput(e);
+        });
+        grid.appendChild(wInput);
+      }
 
-      const rInput = document.createElement('input');
-      rInput.type = 'number';
-      rInput.inputMode = 'numeric';
-      rInput.min = 0; rInput.max = 99;
-      rInput.className = 'set-input' + (rVal !== '' ? ' filled' : '');
-      rInput.value = rVal;
-      rInput.placeholder = '0';
-      rInput.id = `r-${exNum}-${setNum}`;
-      rInput.dataset.ex = exNum;
-      rInput.dataset.set = setNum;
-      rInput.addEventListener('input', e => {
-        if (e.target.value.length > 2) e.target.value = e.target.value.slice(0, 2);
-        onSetInput(e);
-      });
+      if (tt === 'weight_reps' || tt === 'reps') {
+        // Reps input
+        const rVal = saved?.reps ?? '';
+        const rInput = document.createElement('input');
+        rInput.type = 'number'; rInput.inputMode = 'numeric';
+        rInput.min = 0; rInput.max = 999;
+        rInput.className = 'set-input' + (rVal !== '' ? ' filled' : '');
+        rInput.value = rVal; rInput.placeholder = '0';
+        rInput.id = `r-${exNum}-${setNum}`;
+        rInput.addEventListener('input', e => {
+          if (e.target.value.length > 3) e.target.value = e.target.value.slice(0, 3);
+          onSetInput(e);
+        });
+        grid.appendChild(rInput);
+      }
+
+      if (tt === 'time' || tt === 'weight_time') {
+        // Time input (seconds)
+        const tVal = saved?.time_sec ?? '';
+        const tInput = document.createElement('input');
+        tInput.type = 'number'; tInput.inputMode = 'numeric';
+        tInput.min = 0; tInput.max = 9999;
+        tInput.className = 'set-input' + (tVal !== '' ? ' filled' : '');
+        tInput.value = tVal; tInput.placeholder = '0';
+        tInput.id = `t-${exNum}-${setNum}`;
+        tInput.addEventListener('input', e => {
+          if (e.target.value.length > 4) e.target.value = e.target.value.slice(0, 4);
+          onSetInput(e);
+        });
+        grid.appendChild(tInput);
+      }
 
       // History cell (read-only)
       const histCell = document.createElement('div');
       histCell.className = 'set-hist';
       const histSet = lastForEx?.sets?.find(s => s.set_num === setNum);
-      if (histSet && (histSet.weight != null || histSet.reps != null)) {
-        const hw = histSet.weight != null ? histSet.weight : '—';
-        const hr = histSet.reps   != null ? histSet.reps   : '—';
-        histCell.textContent = `${hw}×${hr}`;
-      }
-
-      grid.appendChild(wInput);
-      grid.appendChild(rInput);
+      histCell.textContent = histCellText(histSet, tt);
       grid.appendChild(histCell);
     }
 
     // Exercise illustration
     const exImg = document.createElement('img');
     exImg.className = 'ex-img';
-    exImg.src = `/static/images/${S.workoutType.toLowerCase()}${exNum}.png`;
+    exImg.src = ex.icon;
     exImg.alt = name;
 
     cardBody.appendChild(grid);
@@ -1092,26 +1139,30 @@ function onSetInput(e) {
 
 async function saveExercise(exNum) {
   if (!S.sessionId) { showToast('Сначала выберите дату и тип тренировки'); return; }
-  const exName = (S.exercises[S.workoutType] || [])[exNum - 1];
-  if (!exName) return;
+  const ex = (S.exercises[S.workoutType] || [])[exNum - 1];
+  if (!ex) return;
 
   const btn = document.getElementById(`save-btn-${exNum}`);
   btn.classList.add('saving');
   btn.textContent = '...';
 
+  const tt = ex.trackingType;
   const sets = [];
-  for (let setNum = 1; setNum <= 3; setNum++) {
+  for (let setNum = 1; setNum <= ex.setsCount; setNum++) {
+    const entry = { set_num: setNum, weight: null, reps: null, time_sec: null };
     const wEl = document.getElementById(`w-${exNum}-${setNum}`);
     const rEl = document.getElementById(`r-${exNum}-${setNum}`);
-    const weight = wEl.value !== '' ? parseFloat(wEl.value) : null;
-    const reps   = rEl.value !== '' ? parseInt(rEl.value)   : null;
-    sets.push({ set_num: setNum, weight, reps });
+    const tEl = document.getElementById(`t-${exNum}-${setNum}`);
+    if (wEl && wEl.value !== '') entry.weight   = parseFloat(wEl.value);
+    if (rEl && rEl.value !== '') entry.reps     = parseInt(rEl.value);
+    if (tEl && tEl.value !== '') entry.time_sec = parseInt(tEl.value);
+    sets.push(entry);
   }
 
   const result = await api('POST', '/api/save_exercise', {
     session_id: S.sessionId,
     exercise_num: exNum,
-    exercise_name: exName,
+    exercise_name: ex.nameRu,
     sets
   });
 
@@ -1232,7 +1283,7 @@ async function loadHistory() {
         <div style="font-size:12px;color:var(--text3);margin-top:1px">${exCount} упр.</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
-        <span class="history-type-badge ${sess.workout_type === 'A' ? 'badge-a' : 'badge-b'}">${sess.workout_type === 'A' ? 'А' : 'Б'}</span>
+        <span class="history-type-badge badge-${sess.workout_type.toLowerCase()}">${typeLabel(sess.workout_type)}</span>
         <span class="history-chevron">▼</span>
       </div>`;
 
@@ -1250,9 +1301,12 @@ async function loadHistory() {
       ex.sets.forEach(s => {
         const chip = document.createElement('span');
         chip.className = 'history-set-chip';
-        const w = s.weight != null ? `${s.weight} кг` : '—';
-        const r = s.reps   != null ? `${s.reps}`      : '—';
-        chip.textContent = `${s.set_num}: ${w} × ${r}`;
+        // Format based on which fields are present (infer trackingType)
+        const parts = [];
+        if (s.weight   != null) parts.push(`${s.weight} кг`);
+        if (s.reps     != null) parts.push(`${s.reps} раз`);
+        if (s.time_sec != null) parts.push(`${s.time_sec} сек`);
+        chip.textContent = `${s.set_num}: ${parts.length ? parts.join(' × ') : '—'}`;
         setsDiv.appendChild(chip);
       });
       exDiv.appendChild(setsDiv);

@@ -312,13 +312,13 @@
     background: var(--fill4);
   }
 
-  /* Sets grid — no set numbers, 2 columns only */
+  /* Sets grid — kg / reps / history (3 columns) */
   .sets-grid {
     display: grid;
-    grid-template-columns: 62px 62px;
+    grid-template-columns: 62px 62px 50px;
     align-items: center;
     gap: 4px 8px;
-    padding: 6px 10px 4px;
+    padding: 6px 6px 4px 10px;
     flex: 1;
   }
   .sets-col-header {
@@ -339,27 +339,18 @@
   .set-input:focus { border-color: var(--primary); background: rgba(0,122,255,0.06); }
   .set-input.filled { background: rgba(52,199,89,0.08); border-color: rgba(52,199,89,0.3); }
 
-  /* Last results hint */
-  .ex-last-result {
-    display: none;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px;
-    padding: 0 10px 6px 10px;
-  }
-  .ex-last-label {
-    font-size: 11px;
-    color: var(--text3);
-    font-weight: 500;
-    flex-shrink: 0;
-  }
-  .ex-last-chip {
+  /* History column cell — read-only, gray */
+  .set-hist {
     background: var(--fill4);
-    border-radius: 6px;
-    padding: 2px 6px;
-    font-size: 11px;
-    color: var(--text2);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 6px 3px;
+    font-size: 11px; font-weight: 500;
+    color: rgba(0,0,0,0.58);
+    text-align: center; width: 100%;
+    user-select: none;
     font-variant-numeric: tabular-nums;
+    line-height: 1.25;
   }
 
   .ex-footer { padding: 4px 10px 8px; display: flex; justify-content: flex-end; }
@@ -995,12 +986,16 @@ function renderExercises(savedSets = {}) {
     const grid = document.createElement('div');
     grid.className = 'sets-grid';
 
-    // Column headers — no set number column
+    // Column headers: кг / повт. / Ист.
     grid.innerHTML = `
       <div class="sets-col-header">кг</div>
-      <div class="sets-col-header">повт.</div>`;
+      <div class="sets-col-header">повт.</div>
+      <div class="sets-col-header">Ист.</div>`;
 
-    // 3 set rows (without set number label)
+    // Last history data for this exercise
+    const lastForEx = S.lastResults[name];
+
+    // 3 set rows
     for (let setNum = 1; setNum <= 3; setNum++) {
       const saved = exSets[setNum];
       const wVal = saved?.weight ?? '';
@@ -1037,8 +1032,19 @@ function renderExercises(savedSets = {}) {
         onSetInput(e);
       });
 
+      // History cell (read-only)
+      const histCell = document.createElement('div');
+      histCell.className = 'set-hist';
+      const histSet = lastForEx?.sets?.find(s => s.set_num === setNum);
+      if (histSet && (histSet.weight != null || histSet.reps != null)) {
+        const hw = histSet.weight != null ? histSet.weight : '—';
+        const hr = histSet.reps   != null ? histSet.reps   : '—';
+        histCell.textContent = `${hw}×${hr}`;
+      }
+
       grid.appendChild(wInput);
       grid.appendChild(rInput);
+      grid.appendChild(histCell);
     }
 
     // Exercise illustration
@@ -1050,12 +1056,6 @@ function renderExercises(savedSets = {}) {
     cardBody.appendChild(grid);
     cardBody.appendChild(exImg);
     card.appendChild(cardBody);
-
-    // Last results hint block
-    const lastEl = document.createElement('div');
-    lastEl.className = 'ex-last-result';
-    lastEl.id = `last-${exNum}`;
-    card.appendChild(lastEl);
 
     // Footer with save button
     const footer = document.createElement('div');
@@ -1081,42 +1081,8 @@ function renderExercises(savedSets = {}) {
   finishBtn.addEventListener('click', finishWorkout);
   finishWrap.appendChild(finishBtn);
   container.appendChild(finishWrap);
-
-  // Populate last results
-  populateLastResults();
 }
 
-function populateLastResults() {
-  const exList = S.exercises[S.workoutType] || [];
-  exList.forEach((name, idx) => {
-    const exNum = idx + 1;
-    const lastEl = document.getElementById(`last-${exNum}`);
-    if (!lastEl) return;
-
-    const data = S.lastResults[name];
-    if (!data || !data.sets || data.sets.length === 0) {
-      lastEl.style.display = 'none';
-      return;
-    }
-
-    lastEl.innerHTML = '';
-    const label = document.createElement('span');
-    label.className = 'ex-last-label';
-    label.textContent = formatDate(data.date) + ':';
-    lastEl.appendChild(label);
-
-    data.sets.forEach(s => {
-      const chip = document.createElement('span');
-      chip.className = 'ex-last-chip';
-      const w = s.weight != null ? `${s.weight} кг` : '—';
-      const r = s.reps   != null ? `${s.reps} ×`   : '—';
-      chip.textContent = `С${s.set_num}: ${r} ${w}`;
-      lastEl.appendChild(chip);
-    });
-
-    lastEl.style.display = 'flex';
-  });
-}
 
 function onSetInput(e) {
   const input = e.target;
@@ -1285,8 +1251,8 @@ async function loadHistory() {
         const chip = document.createElement('span');
         chip.className = 'history-set-chip';
         const w = s.weight != null ? `${s.weight} кг` : '—';
-        const r = s.reps   != null ? `${s.reps} ×`   : '—';
-        chip.textContent = `С${s.set_num}: ${r} ${w}`;
+        const r = s.reps   != null ? `${s.reps}`      : '—';
+        chip.textContent = `${s.set_num}: ${w} × ${r}`;
         setsDiv.appendChild(chip);
       });
       exDiv.appendChild(setsDiv);

@@ -310,26 +310,40 @@ def suggest():
     return jsonify({'suggested': get_suggested_workout(d)})
 
 
-@app.route('/api/session', methods=['POST'])
+@app.route('/api/session', methods=['GET', 'POST'])
 @auth_required
 def get_or_create_session():
-    data = request.json
-    workout_date = data['date']
-    workout_type = data['type']
-
     conn = get_db()
     try:
         c = conn.cursor()
-        c.execute(
-            'INSERT OR IGNORE INTO workout_sessions (date, workout_type) VALUES (?, ?)',
-            (workout_date, workout_type)
-        )
-        conn.commit()
-        c.execute(
-            'SELECT id FROM workout_sessions WHERE date=? AND workout_type=?',
-            (workout_date, workout_type)
-        )
-        session_id = c.fetchone()['id']
+
+        if request.method == 'GET':
+            # Look up existing session — does NOT create one
+            workout_date = request.args.get('date')
+            workout_type = request.args.get('type')
+            c.execute(
+                'SELECT id FROM workout_sessions WHERE date=? AND workout_type=?',
+                (workout_date, workout_type)
+            )
+            row = c.fetchone()
+            if not row:
+                return jsonify({'session_id': None, 'sets': []})
+            session_id = row['id']
+        else:
+            # POST — create session if not exists (called only when actually saving)
+            data = request.json
+            workout_date = data['date']
+            workout_type = data['type']
+            c.execute(
+                'INSERT OR IGNORE INTO workout_sessions (date, workout_type) VALUES (?, ?)',
+                (workout_date, workout_type)
+            )
+            conn.commit()
+            c.execute(
+                'SELECT id FROM workout_sessions WHERE date=? AND workout_type=?',
+                (workout_date, workout_type)
+            )
+            session_id = c.fetchone()['id']
 
         c.execute(
             '''SELECT exercise_num, set_num, weight, reps, time_sec

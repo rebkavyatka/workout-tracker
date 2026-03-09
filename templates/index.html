@@ -261,9 +261,9 @@
   .type-label { font-size: 13px; color: var(--text3); flex-shrink: 0; }
   .type-pills { display: flex; gap: 6px; }
   .type-pill {
-    padding: 6px 20px;
+    padding: 5px 17px;
     border-radius: 20px;
-    font-size: 15px; font-weight: 600;
+    font-size: 14px; font-weight: 600;
     border: 1.5px solid var(--sep);
     background: var(--card); color: var(--text3);
     cursor: pointer; transition: all .15s;
@@ -567,10 +567,10 @@
           <div class="type-row">
             <span class="type-label">Тренировка</span>
             <div class="type-pills">
-              <button class="type-pill" id="pill-a" data-type="A">А</button>
-              <button class="type-pill" id="pill-b" data-type="B">Б</button>
-              <button class="type-pill" id="pill-c" data-type="C">В</button>
-              <button class="type-pill" id="pill-d" data-type="D">Г</button>
+              <button class="type-pill" id="pill-a" data-type="A">A</button>
+              <button class="type-pill" id="pill-b" data-type="B">B</button>
+              <button class="type-pill" id="pill-c" data-type="C">C</button>
+              <button class="type-pill" id="pill-d" data-type="D">D</button>
             </div>
             <span class="session-badge" id="session-badge"></span>
           </div>
@@ -936,10 +936,11 @@ async function loadSession() {
   badge.textContent = '...';
   badge.className = 'session-badge';
 
-  const data = await api('POST', '/api/session', { date: d, type: S.workoutType });
+  // GET only — does NOT create session in DB, just looks up existing
+  const data = await api('GET', `/api/session?date=${d}&type=${S.workoutType}`);
   if (!data) return;
 
-  S.sessionId = data.session_id;
+  S.sessionId = data.session_id; // null if no session exists yet — that's fine
   S.saved.clear();
 
   const savedSets = {};
@@ -1138,13 +1139,31 @@ function onSetInput(e) {
 }
 
 async function saveExercise(exNum) {
-  if (!S.sessionId) { showToast('Сначала выберите дату и тип тренировки'); return; }
   const ex = (S.exercises[S.workoutType] || [])[exNum - 1];
   if (!ex) return;
 
   const btn = document.getElementById(`save-btn-${exNum}`);
   btn.classList.add('saving');
   btn.textContent = '...';
+
+  // Lazy session creation — only create DB record on first actual save
+  if (!S.sessionId) {
+    const d = document.getElementById('date-input').value;
+    if (!d || !S.workoutType) {
+      btn.classList.remove('saving');
+      btn.textContent = 'Сохранить';
+      showToast('Выберите дату и тип тренировки');
+      return;
+    }
+    const sessData = await api('POST', '/api/session', { date: d, type: S.workoutType });
+    if (!sessData) {
+      btn.classList.remove('saving');
+      btn.textContent = 'Сохранить';
+      showToast('Ошибка создания тренировки', 2500);
+      return;
+    }
+    S.sessionId = sessData.session_id;
+  }
 
   const tt = ex.trackingType;
   const sets = [];

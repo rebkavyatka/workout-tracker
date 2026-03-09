@@ -8,6 +8,8 @@ import io
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'wt_xK9mP_2026_secret')
+# Cache static files for 1 year in browser
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'workouts.db')
 

@@ -6,6 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Тренировки</title>
+<!-- Preload all 5 login photos so whichever is picked shows instantly -->
+<link rel="preload" as="image" href="/static/images/moto1.webp">
+<link rel="preload" as="image" href="/static/images/moto2.webp">
+<link rel="preload" as="image" href="/static/images/moto3.webp">
+<link rel="preload" as="image" href="/static/images/moto4.webp">
+<link rel="preload" as="image" href="/static/images/moto5.webp">
 <style>
   /* ── Design tokens (iOS 17) ─────────────────────────── */
   :root {
@@ -715,7 +721,7 @@ async function loadLoginPageData() {
   try {
     const r = await fetch('/api/login-page-data');
     const data = await r.json();
-    document.getElementById('login-photo').src = `/static/images/moto${data.photo_num}.png`;
+    document.getElementById('login-photo').src = `/static/images/moto${data.photo_num}.webp`;
     document.getElementById('login-slogan').textContent = data.slogan;
     if (data.locked) {
       lockPinInput('Возможность снова вводить пароль будет доступна через 30 минут');

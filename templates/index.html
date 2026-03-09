@@ -150,19 +150,30 @@
 
   /* ── WELCOME ─────────────────────────────────────────── */
   #v-welcome {
-    background: var(--bg);
+    background: #000;
     justify-content: center;
     align-items: center;
     padding: 40px 32px;
-    gap: 36px;
+    gap: 32px;
   }
-  .welcome-emoji { font-size: 64px; line-height: 1; }
-  .welcome-text {
-    font-size: 24px; font-weight: 700;
-    color: var(--text);
+  .welcome-video-wrap {
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(255,255,255,0.18);
+    flex-shrink: 0;
+  }
+  .welcome-video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .welcome-slogan {
+    font-size: 22px; font-weight: 700;
+    color: #FFFFFF;
     text-align: center;
     line-height: 1.35;
-    letter-spacing: -0.4px;
+    letter-spacing: -0.3px;
+    max-width: 320px;
   }
   .welcome-btn {
     width: 100%; max-width: 340px;
@@ -523,8 +534,12 @@
 
   <!-- ── WELCOME ───────────────────────────────────────── -->
   <div id="v-welcome" class="view">
-    <div class="welcome-emoji">💪</div>
-    <p class="welcome-text">Игорь, добро пожаловать,<br>готов начать тренировку?</p>
+    <div class="welcome-video-wrap">
+      <video id="welcome-video" autoplay muted loop playsinline class="welcome-video">
+        <source src="/static/video/circle_video.webm" type="video/webm">
+      </video>
+    </div>
+    <p id="welcome-slogan" class="welcome-slogan"></p>
     <button id="welcome-btn" class="welcome-btn">Начать тренировку</button>
   </div>
 
@@ -628,6 +643,17 @@
 <div id="toast"></div>
 
 <script>
+/* ── Welcome slogans ─────────────────────────────────── */
+const WELCOME_SLOGANS = [
+  'Привет милый, погнали?',
+  'Покачаемся сегодня?',
+  'Отжаришь по полной?',
+  'Покажи им класс!',
+  'Зажги мой король!',
+  'Обожаю тебя, вперед!',
+  'Ты лучший, покажи класс!',
+];
+
 /* ── State ────────────────────────────────────────────── */
 const S = {
   sessionId:   null,
@@ -793,11 +819,22 @@ async function postLoginSetup() {
   if (activeSessionData?.session) {
     await resumeActiveSession(activeSessionData.session);
   } else {
-    showView('welcome');
+    showWelcome();
   }
 }
 
 /* ── Welcome screen ──────────────────────────────────── */
+function showWelcome() {
+  // Pick random slogan
+  const slogan = WELCOME_SLOGANS[Math.floor(Math.random() * WELCOME_SLOGANS.length)];
+  document.getElementById('welcome-slogan').textContent = slogan;
+  // Restart video
+  const vid = document.getElementById('welcome-video');
+  vid.currentTime = 0;
+  vid.play().catch(() => {});
+  showView('welcome');
+}
+
 document.getElementById('welcome-btn').addEventListener('click', () => {
   showView('app');
   switchTab('workout');

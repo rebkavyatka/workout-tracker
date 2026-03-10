@@ -1,41 +1,22 @@
-# Отсутствующие иконки упражнений (Тренировки C и D)
+# Иконки упражнений (Тренировки C и D)
 
-Для следующих упражнений иконки **не найдены** в папке `static/images/3/`.
-Вместо них временно используется заглушка `placeholder.webp`.
+Все иконки подключены. Заглушек нет.
 
-## Тренировка C
+## Полная карта иконок
 
-| # | Упражнение | trackingType |
+| Файл | Упражнение | Тренировка |
 |---|---|---|
-| 7 | Разведение бедра (Hip Abduction) | weight_reps |
-
-## Тренировка D
-
-| # | Упражнение | trackingType |
-|---|---|---|
-| 1 | Wall Angels | reps |
-| 3 | Ягодичный мостик на скамье (Hip Thrust) | weight_reps |
-| 4 | Копенгагенская планка (Copenhagen Plank) | time |
-| 6 | Проходка с гантелью (Suitcase Carry) | weight_time |
-
-## Как добавить иконку
-
-1. Поместить файл `.png` или `.webp` в папку `static/images/3/`
-2. Открыть `app.py`
-3. В словаре `EXERCISES` найти нужное упражнение (тренировка `C` или `D`)
-4. Заменить `'/static/images/3/placeholder.webp'` на путь к новому файлу
-
-## Использованные иконки
-
-| Файл | Упражнение |
-|---|---|
-| `dead-hang.webp` | Вис на турнике (Dead Hang) |
-| `cat-cow.webp` | Кошка-корова (Cat-Cow) |
-| `hip-90-90.webp` | 90/90 Hip Mobility |
-| `hip-flexor-stretch.webp` | Растяжка сгибателей бедра у стены |
-| `bird-dog.webp` | Bird Dog |
-| `side-plank.webp` | Боковая планка (Side Plank) |
-| `back-extension-hold.webp` | Статическое удержание корпуса под 45° |
-| `back-extension.webp` | Гиперэкстензия (Back Extension) |
-| `thread-needle.webp` | Продевание иглы (Thread the Needle) |
-| `placeholder.webp` | Заглушка для 5 упражнений без иконок |
+| `dead-hang.webp` | Вис на турнике | C1, D5 |
+| `cat-cow.webp` | Кошка-корова | C2 |
+| `hip-90-90.webp` | 90/90 Hip Mobility | C3 |
+| `hip-flexor-stretch.webp` | Растяжка сгибателей бедра у стены | C4 |
+| `bird-dog.webp` | Bird Dog | C5 |
+| `side-plank.webp` | Боковая планка | C6 |
+| `hip-abduction.webp` | Разведение бедра | C7 |
+| `back-extension-hold.webp` | Статическое удержание корпуса под 45° | C8 |
+| `back-extension.webp` | Гиперэкстензия | C9 |
+| `wall-angels.webp` | Wall Angels | D1 |
+| `thread-needle.webp` | Продевание иглы | D2 |
+| `hip-thrust.webp` | Ягодичный мостик на скамье | D3 |
+| `copenhagen-plank.webp` | Копенгагенская планка | D4 |
+| `suitcase-carry.webp` | Проходка с гантелью | D6 |

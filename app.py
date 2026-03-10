@@ -37,17 +37,17 @@ EXERCISES = {
         {'nameRu': 'Растяжка сгибателей бедра у стены',           'setsCount': 2, 'trackingType': 'time',         'icon': '/static/images/3/hip-flexor-stretch.webp'},
         {'nameRu': 'Bird Dog',                                    'setsCount': 2, 'trackingType': 'reps',         'icon': '/static/images/3/bird-dog.webp'},
         {'nameRu': 'Боковая планка',                              'setsCount': 2, 'trackingType': 'time',         'icon': '/static/images/3/side-plank.webp'},
-        {'nameRu': 'Разведение бедра',                            'setsCount': 2, 'trackingType': 'weight_reps',  'icon': '/static/images/3/placeholder.webp'},
+        {'nameRu': 'Разведение бедра',                            'setsCount': 2, 'trackingType': 'weight_reps',  'icon': '/static/images/3/hip-abduction.webp'},
         {'nameRu': 'Статическое удержание корпуса под 45\u00b0',  'setsCount': 2, 'trackingType': 'time',         'icon': '/static/images/3/back-extension-hold.webp'},
         {'nameRu': 'Гиперэкстензия',                              'setsCount': 2, 'trackingType': 'weight_reps',  'icon': '/static/images/3/back-extension.webp'},
     ],
     'D': [
-        {'nameRu': 'Wall Angels',                                 'setsCount': 2, 'trackingType': 'reps',         'icon': '/static/images/3/placeholder.webp'},
+        {'nameRu': 'Wall Angels',                                 'setsCount': 2, 'trackingType': 'reps',         'icon': '/static/images/3/wall-angels.webp'},
         {'nameRu': 'Продевание иглы',                             'setsCount': 2, 'trackingType': 'reps',         'icon': '/static/images/3/thread-needle.webp'},
-        {'nameRu': 'Ягодичный мостик на скамье',                  'setsCount': 2, 'trackingType': 'weight_reps',  'icon': '/static/images/3/placeholder.webp'},
-        {'nameRu': 'Копенгагенская планка',                       'setsCount': 2, 'trackingType': 'time',         'icon': '/static/images/3/placeholder.webp'},
+        {'nameRu': 'Ягодичный мостик на скамье',                  'setsCount': 2, 'trackingType': 'weight_reps',  'icon': '/static/images/3/hip-thrust.webp'},
+        {'nameRu': 'Копенгагенская планка',                       'setsCount': 2, 'trackingType': 'time',         'icon': '/static/images/3/copenhagen-plank.webp'},
         {'nameRu': 'Вис на турнике',                              'setsCount': 2, 'trackingType': 'time',         'icon': '/static/images/3/dead-hang.webp'},
-        {'nameRu': 'Проходка с гантелью',                         'setsCount': 2, 'trackingType': 'weight_time',  'icon': '/static/images/3/placeholder.webp'},
+        {'nameRu': 'Проходка с гантелью',                         'setsCount': 2, 'trackingType': 'weight_time',  'icon': '/static/images/3/suitcase-carry.webp'},
     ],
 }
 
